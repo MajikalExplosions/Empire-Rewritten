@@ -22,15 +22,14 @@ namespace Empire_Rewritten.Controllers
     public class FactionController : IExposable
     {
         public const int daysPerTurn = 15;
- 
+
         private readonly Dictionary<Faction, AIPlayer> AIFactions = new Dictionary<Faction, AIPlayer>();
         private readonly List<FactionCivicAndEthicData> factionCivicAndEthicDataList = new List<FactionCivicAndEthicData>();
+        private EventManager eventManager = new EventManager();
+        private Faction playerFaction;
         private List<FactionSettlementData> factionSettlementDataList = new List<FactionSettlementData>();
         private TerritoryManager territoryManager = new TerritoryManager();
-        private Faction playerFaction;
-        private EventManager eventManager = new EventManager();
 
-        public List<FactionSettlementData> ReadOnlyFactionSettlementData => factionSettlementDataList;
         /// <summary>
         ///     Needed for loading
         /// </summary>
@@ -52,6 +51,8 @@ namespace Empire_Rewritten.Controllers
             this.factionSettlementDataList = factionSettlementDataList;
         }
 
+        public List<FactionSettlementData> ReadOnlyFactionSettlementData => factionSettlementDataList;
+
         public TerritoryManager TerritoryManager => territoryManager;
 
         /// <summary>
@@ -69,6 +70,7 @@ namespace Empire_Rewritten.Controllers
 
         /// <param name="faction"></param>
         /// <returns>The <see cref="Empire" /> owned by a given <paramref name="faction" /></returns>
+        [CanBeNull]
         public Empire GetOwnedSettlementManager(Faction faction)
         {
             foreach (FactionSettlementData factionSettlementData in factionSettlementDataList)
@@ -95,16 +97,22 @@ namespace Empire_Rewritten.Controllers
         public void CreatePlayer()
         {
             Faction faction = Faction.OfPlayer;
-            FactionSettlementData factionSettlementData = new FactionSettlementData(faction, new Empire(faction, true));
+
+            Empire playerEmpire = new Empire(faction, false);
+            FactionSettlementData factionSettlementData = new FactionSettlementData(faction, playerEmpire);
             factionSettlementDataList.Add(factionSettlementData);
+
             // NOTE: Why is this unused?
             UserPlayer player = new UserPlayer(faction);
-            IEnumerable<WorldObject> settlements = Find.WorldObjects.Settlements.Where(x => x.Faction == faction);
-            TerritoryManager.GetTerritory(faction).SettlementClaimTiles((Settlement)settlements.First());
+
+            IEnumerable<Settlement> playerSettlements = Find.WorldObjects.Settlements.Where(x => x.Faction == faction);
+            playerEmpire.AddSettlements(playerSettlements);
 
             //Generate a player faction
             if (playerFaction == null)
+            {
                 playerFaction = PlayerFactionGenerator.GeneratePlayerFaction();
+            }
         }
 
         public void CreateNewAIPlayer(Faction faction)

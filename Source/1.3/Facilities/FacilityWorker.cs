@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Verse;
 
 namespace Empire_Rewritten.Facilities
@@ -16,6 +17,7 @@ namespace Empire_Rewritten.Facilities
             this.facilityDef = facilityDef;
         }
 
+        [ItemNotNull]
         public virtual IEnumerable<Gizmo> GetGizmos()
         {
             return Enumerable.Empty<Gizmo>();

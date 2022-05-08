@@ -2,6 +2,7 @@
 using System.Linq;
 using Empire_Rewritten.Controllers;
 using Empire_Rewritten.Facilities;
+using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using Verse;
@@ -15,9 +16,10 @@ namespace Empire_Rewritten.Settlements
         /// </summary>
         /// <param name="settlement">The <see cref="Settlement" /> to get the <see cref="Empire" /> of</param>
         /// <returns>The <see cref="Empire" /> of <paramref name="settlement" /></returns>
-        public static Empire GetManager(this Settlement settlement)
+        [CanBeNull]
+        public static Empire GetManager([NotNull] this Settlement settlement)
         {
-            return UpdateController.CurrentWorldInstance.FactionController.GetOwnedSettlementManager(settlement.Faction);
+            return UpdateController.CurrentWorldInstance?.FactionController?.GetOwnedSettlementManager(settlement.Faction);
         }
 
         /// <summary>
@@ -26,9 +28,13 @@ namespace Empire_Rewritten.Settlements
         /// </summary>
         /// <param name="settlement">The <see cref="Settlement" /> to get the <see cref="Gizmo">Gizmos</see> of</param>
         /// <returns>The <see cref="Gizmo">Gizmos</see> of <paramref name="settlement" /></returns>
-        public static IEnumerable<Gizmo> GetExtendedGizmos(this Settlement settlement)
+        [NotNull]
+        [ItemNotNull]
+        public static IEnumerable<Gizmo> GetExtendedGizmos([NotNull] this Settlement settlement)
         {
-            return settlement.Faction == Faction.OfPlayer ? GetManager(settlement).GetFacilityManager(settlement).GetGizmos() : Enumerable.Empty<Gizmo>();
+            if (settlement.Faction != Faction.OfPlayer) return Enumerable.Empty<Gizmo>();
+
+            return GetManager(settlement)?.GetFacilityManager(settlement)?.GetGizmos() ?? Enumerable.Empty<Gizmo>();
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Empire_Rewritten.Events;
 using Empire_Rewritten.Utils;
 using JetBrains.Annotations;
 using RimWorld.Planet;
@@ -15,11 +14,11 @@ namespace Empire_Rewritten.Controllers
     public class UpdateController : WorldComponent
     {
         private static readonly List<Action<FactionController>> FinalizeInitHooks = new List<Action<FactionController>>();
+
         private readonly List<UpdateControllerAction> actions = new List<UpdateControllerAction>();
 
         private FactionController factionController;
 
-       
 
         public UpdateController(World world) : base(world)
         {

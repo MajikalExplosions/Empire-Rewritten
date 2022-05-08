@@ -87,6 +87,7 @@ namespace Empire_Rewritten.Facilities
         /// <summary>
         ///     Get gizmos from all facilities in the settlement.
         /// </summary>
+        [ItemNotNull]
         public IEnumerable<Gizmo> GetGizmos()
         {
             if (!refreshGizmos) return gizmos;
