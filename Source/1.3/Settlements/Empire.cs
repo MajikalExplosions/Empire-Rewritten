@@ -17,21 +17,26 @@ namespace Empire_Rewritten.Settlements
     /// </summary>
     public class Empire : IExposable, ILoadReferenceable
     {
-        private Territory cachedTerritory;
-        private List<FacilityManager> facilityManagersForLoading = new List<FacilityManager>();
-        private Faction faction;
+        public static readonly Dictionary<ThingDef, int> SettlementCost = new Dictionary<ThingDef, int>
+        {
+            { ThingDefOf.WoodLog, 500 }, { ThingDefOf.Steel, 100 }, { ThingDefOf.ComponentIndustrial, 12 }, { ThingDefOf.Silver, 200 },
+        };
+
         private bool isAIPlayer;
+        private bool territoryIsDirty;
 
         private Dictionary<Settlement, FacilityManager> settlements = new Dictionary<Settlement, FacilityManager>();
+        private Faction faction;
+        private List<FacilityManager> facilityManagersForLoading = new List<FacilityManager>();
 
         private List<Settlement> settlementsForLoading = new List<Settlement>();
         private StorageTracker storageTracker = new StorageTracker();
-        private bool territoryIsDirty;
+        private Territory cachedTerritory;
 
         [UsedImplicitly]
         public Empire() { }
 
-        public Empire([NotNull] Faction faction, bool isAIPlayer)
+        public Empire([NotNull] Faction faction, bool isAIPlayer = true)
         {
             this.faction = faction ?? throw new ArgumentNullException(nameof(faction));
             this.isAIPlayer = isAIPlayer;
@@ -139,7 +144,7 @@ namespace Empire_Rewritten.Settlements
         }
 
         /// <summary>
-        ///     Adds a <see cref="Settlement" /> to the <see cref="Empire" />.
+        ///     Add a <see cref="Settlement" /> to the <see cref="Empire" />.
         /// </summary>
         /// <param name="settlement">The <see cref="Settlement" /> to add</param>
         public void AddSettlement(Settlement settlement)
@@ -150,12 +155,12 @@ namespace Empire_Rewritten.Settlements
         }
 
         /// <summary>
-        ///     Adds multiple <see cref="Settlement">Settlements</see> to the <see cref="Empire" />.
+        ///     Add several <see cref="Settlement">Settlements</see> to the <see cref="Empire" />.
         /// </summary>
-        /// <param name="settlementsToAdd">The <see cref="Settlement">Settlements</see> to add</param>
-        public void AddSettlements(IEnumerable<Settlement> settlementsToAdd)
+        /// <param name="settlements">The <see cref="Settlement">Settlements</see> to add</param>
+        public void AddSettlements(IEnumerable<Settlement> settlements)
         {
-            foreach (Settlement settlement in settlementsToAdd)
+            foreach (Settlement settlement in settlements)
             {
                 AddSettlement(settlement);
             }
