@@ -17,7 +17,7 @@ namespace Empire_Rewritten.Settlements
     /// </summary>
     public class Empire : IExposable, ILoadReferenceable
     {
-        public static readonly Dictionary<ThingDef, int> SettlementCost = new Dictionary<ThingDef, int>
+        [NotNull] public static readonly Dictionary<ThingDef, int> SettlementCost = new Dictionary<ThingDef, int>
         {
             { ThingDefOf.WoodLog, 500 }, { ThingDefOf.Steel, 100 }, { ThingDefOf.ComponentIndustrial, 12 }, { ThingDefOf.Silver, 200 },
         };
@@ -25,12 +25,13 @@ namespace Empire_Rewritten.Settlements
         private bool isAIPlayer;
         private bool territoryIsDirty;
 
-        private Dictionary<Settlement, FacilityManager> settlements = new Dictionary<Settlement, FacilityManager>();
-        private Faction faction;
+        [NotNull] private Dictionary<Settlement, FacilityManager> settlements = new Dictionary<Settlement, FacilityManager>();
+        [NotNull] private Faction faction;
         private List<FacilityManager> facilityManagersForLoading = new List<FacilityManager>();
 
         private List<Settlement> settlementsForLoading = new List<Settlement>();
-        private StorageTracker storageTracker = new StorageTracker();
+
+        [NotNull] private StorageTracker storageTracker = new StorageTracker();
         private Territory cachedTerritory;
 
         [UsedImplicitly]
@@ -43,12 +44,13 @@ namespace Empire_Rewritten.Settlements
         }
 
         public bool IsAIPlayer => isAIPlayer;
-        public Faction Faction => faction;
+        [NotNull] public Faction Faction => faction;
 
-        public StorageTracker StorageTracker => storageTracker;
-        public Dictionary<Settlement, FacilityManager> Settlements => settlements;
-        public List<int> SettlementTiles { get; } = new List<int>();
+        [NotNull] public StorageTracker StorageTracker => storageTracker;
+        [NotNull] public Dictionary<Settlement, FacilityManager> Settlements => settlements;
+        [NotNull] public IEnumerable<int> SettlementTiles => Settlements.Keys.Select(settlement => settlement?.Tile ?? -1);
 
+        [CanBeNull]
         private Territory Territory
         {
             get
@@ -56,23 +58,29 @@ namespace Empire_Rewritten.Settlements
                 if (cachedTerritory == null || territoryIsDirty)
                 {
                     territoryIsDirty = false;
-                    cachedTerritory = TerritoryManager.GetTerritoryManager.GetTerritory(faction);
+                    cachedTerritory = TerritoryManager.CurrentInstance?.GetTerritory(faction);
                 }
 
                 return cachedTerritory;
             }
         }
 
-        public IEnumerable<FacilityManager> AllFacilityManagers => settlements.Values;
+        [NotNull] [ItemNotNull] public IEnumerable<FacilityManager> AllFacilityManagers => settlements.Values;
 
         public void ExposeData()
         {
-            Scribe_Collections.Look(ref settlements, "settlements", LookMode.Reference, LookMode.Deep, ref settlementsForLoading, ref facilityManagersForLoading);
+            Scribe_Collections.Look(ref settlements,
+                                    "settlements",
+                                    LookMode.Reference,
+                                    LookMode.Deep,
+                                    ref settlementsForLoading,
+                                    ref facilityManagersForLoading);
             Scribe_References.Look(ref faction, "faction");
             Scribe_Deep.Look(ref storageTracker, "storageTracker");
-            Scribe_Values.Look(ref isAIPlayer, nameof(isAIPlayer));
+            Scribe_Values.Look(ref isAIPlayer, "isAIPlayer");
         }
 
+        [Pure]
         public string GetUniqueLoadID()
         {
             return $"{nameof(Empire)}_{GetHashCode()}";
@@ -87,12 +95,19 @@ namespace Empire_Rewritten.Settlements
         ///     Compiles a complete dictionary of all the resources a faction is producing and their modifiers.
         /// </summary>
         /// <returns></returns>
+        [NotNull]
         public Dictionary<ResourceDef, ResourceModifier> ResourceModifiersFromAllFacilities()
         {
             Dictionary<ResourceDef, ResourceModifier> resourceModifiers = new Dictionary<ResourceDef, ResourceModifier>();
             List<FacilityManager> facilities = settlements.Values.ToList();
             foreach (FacilityManager facilityManager in facilities)
             {
+                if (facilityManager is null)
+                {
+                    Logger.Error($"{nameof(Empire)} {faction.Name} has a null {nameof(FacilityManager)}.");
+                    continue;
+                }
+
                 foreach (ResourceModifier resourceModifier in facilityManager.Modifiers)
                 {
                     if (resourceModifiers.ContainsKey(resourceModifier.def))
@@ -133,6 +148,7 @@ namespace Empire_Rewritten.Settlements
                         used.Add(found.Name);
                     }
 
+                    if (faction.def.factionNameMaker is null) Logger.Error("FactionDef " + faction.def.defName + " has no faction name maker.");
                     settlement.Name = NameGenerator.GenerateName(faction.def.factionNameMaker, used, true);
                     Find.WorldObjects.Add(settlement);
                     AddSettlement(settlement);
@@ -147,18 +163,17 @@ namespace Empire_Rewritten.Settlements
         ///     Add a <see cref="Settlement" /> to the <see cref="Empire" />.
         /// </summary>
         /// <param name="settlement">The <see cref="Settlement" /> to add</param>
-        public void AddSettlement(Settlement settlement)
+        public void AddSettlement([NotNull] Settlement settlement)
         {
             settlements.Add(settlement, new FacilityManager(settlement));
-            Territory.SettlementClaimTiles(settlement);
-            SettlementTiles.Add(settlement.Tile);
+            Territory?.SettlementClaimTiles(settlement);
         }
 
         /// <summary>
         ///     Add several <see cref="Settlement">Settlements</see> to the <see cref="Empire" />.
         /// </summary>
         /// <param name="settlements">The <see cref="Settlement">Settlements</see> to add</param>
-        public void AddSettlements(IEnumerable<Settlement> settlements)
+        public void AddSettlements([NotNull] [ItemNotNull] IEnumerable<Settlement> settlements)
         {
             foreach (Settlement settlement in settlements)
             {
@@ -166,11 +181,14 @@ namespace Empire_Rewritten.Settlements
             }
         }
 
-        public Settlement GetSettlement(FacilityManager manager)
+        [CanBeNull]
+        public Settlement GetSettlement([CanBeNull] FacilityManager manager)
         {
-            foreach (Settlement settlement in settlements.Keys)
+            if (manager == null) return null;
+
+            foreach ((Settlement settlement, FacilityManager facilityManager) in settlements)
             {
-                if (settlements[settlement] == manager)
+                if (facilityManager == manager)
                 {
                     return settlement;
                 }
@@ -180,7 +198,7 @@ namespace Empire_Rewritten.Settlements
         }
 
         [CanBeNull]
-        public FacilityManager GetFacilityManager(Settlement settlement)
+        public FacilityManager GetFacilityManager([NotNull] Settlement settlement)
         {
             if (settlements.ContainsKey(settlement))
             {

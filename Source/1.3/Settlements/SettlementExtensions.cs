@@ -19,7 +19,7 @@ namespace Empire_Rewritten.Settlements
         [CanBeNull]
         public static Empire GetManager([NotNull] this Settlement settlement)
         {
-            return UpdateController.CurrentWorldInstance?.FactionController?.GetOwnedSettlementManager(settlement.Faction);
+            return UpdateController.CurrentWorldInstance?.FactionController?.GetOwnedEmpire(settlement.Faction);
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Empire_Rewritten.Facilities;
 using Empire_Rewritten.Utils;
+using JetBrains.Annotations;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
@@ -11,7 +12,6 @@ namespace Empire_Rewritten.Windows
     {
         private const float ItemHeight = 29f;
 
-        private readonly List<FacilityDef> facilityDefs;
         private readonly Rect rectContentMain;
         private readonly Rect rectContentMainLeft;
         private readonly Rect rectContentMainRight;
@@ -20,18 +20,16 @@ namespace Empire_Rewritten.Windows
         private readonly Rect rectSelectionAreaFacilityName;
         private readonly Rect rectWindow = new Rect(0f, 0f, 1200f, 600f);
 
+        [CanBeNull] private FacilityDef defSelected;
+
         private List<FloatMenuOption> cachedOptions;
-
-        private Vector2 defDescScrollVector;
-
-        private FacilityDef defSelected;
 
         private Rect rectFacilityDescription;
 
+        private Vector2 defDescScrollVector;
+
         public FacilityInfoWindow()
         {
-            facilityDefs = DefDatabase<FacilityDef>.AllDefsListForReading;
-
             rectContentMain = rectWindow.ContractedBy(25f);
 
             rectContentMainLeft = rectContentMain.LeftHalf();
@@ -82,6 +80,7 @@ namespace Empire_Rewritten.Windows
 
         private void DrawDescriptionBox()
         {
+            if (defSelected == null) return;
             float descHeight = Text.CalcHeight(defSelected.description, rectFacilityDescription.width);
 
             rectFacilityDescription.height = descHeight;
@@ -92,11 +91,13 @@ namespace Empire_Rewritten.Windows
 
         private void DrawCostList()
         {
+            if (defSelected == null) return;
             GUI.color = Color.gray;
             Widgets.DrawLineHorizontal(rectFacilityDescription.x, rectFacilityDescription.y + rectFacilityDescription.height, rectFacilityDescription.width);
             GUI.color = Color.white;
 
-            Rect rectScrollOuter = rectFacilityDescriptionArea.BottomPartPixels(rectFacilityDescriptionArea.height - rectFacilityDescription.height - 5f).ContractedBy(5f);
+            Rect rectScrollOuter = rectFacilityDescriptionArea.BottomPartPixels(rectFacilityDescriptionArea.height - rectFacilityDescription.height - 5f)
+                                                              .ContractedBy(5f);
             Rect rectScrollInner = new Rect(rectScrollOuter.x, rectScrollOuter.y, rectScrollOuter.width, ItemHeight * defSelected.costList.Count);
 
             if (rectScrollInner.height > rectScrollOuter.height) rectScrollInner.width -= 17f;
@@ -143,6 +144,7 @@ namespace Empire_Rewritten.Windows
 
         private void DrawFacilityIcon()
         {
+            if (defSelected == null) return;
             GUI.DrawTexture(rectSelectionAreaFacilityIcon.ContractedBy(2f), ContentFinder<Texture2D>.Get(defSelected.iconData.texPath));
             Widgets.DrawBox(rectSelectionAreaFacilityIcon, 2);
         }
@@ -154,21 +156,20 @@ namespace Empire_Rewritten.Windows
         {
             if (WindowHelper.DrawInfoScreenSelectorButton(rectSelectionAreaFacilityName, defSelected?.label ?? "Empire_FacilityInfoWindowSelector".Translate()))
             {
-                Find.WindowStack.Add(new FloatMenu(DefOptions));
+                Find.WindowStack?.Add(new FloatMenu(DefOptions));
             }
         }
 
         /// <summary>
-        ///     Generates the <see cref="FloatMenuOption">FloatMenuOptions</see> for the
-        ///     <see cref="FacilityInfoWindow.facilityDefs" />
+        ///     Generates the <see cref="FloatMenuOption">FloatMenuOptions</see> for all <see cref="FacilityDef">FacilityDefs</see>
         /// </summary>
         /// <returns>
         ///     A <see cref="List{T}" /> of <see cref="FloatMenuOption">FloatMenuOptions</see> that set
-        ///     <see cref="FacilityInfoWindow.defSelected" /> to one of <see cref="FacilityInfoWindow.facilityDefs" />
+        ///     <see cref="FacilityInfoWindow.defSelected" /> to a <see cref="FacilityDef" />" />
         /// </returns>
         private List<FloatMenuOption> CreateFloatMenuOptions()
         {
-            return FloatMenuOptionCreator.CreateFloatMenuOptions(facilityDefs, def => defSelected = def);
+            return FloatMenuOptionCreator.CreateFloatMenuOptions(DefDatabase<FacilityDef>.AllDefsListForReading, def => defSelected = def);
         }
 
         private void DrawCloseButton(Rect inRect)

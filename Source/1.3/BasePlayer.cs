@@ -1,4 +1,5 @@
 ﻿using Empire_Rewritten.Controllers;
+using JetBrains.Annotations;
 using RimWorld;
 
 namespace Empire_Rewritten
@@ -8,9 +9,9 @@ namespace Empire_Rewritten
     /// </summary>
     public abstract class BasePlayer
     {
-        public Faction faction;
+        [NotNull] public Faction faction;
 
-        public BasePlayer(Faction faction)
+        public BasePlayer([NotNull] Faction faction)
         {
             this.faction = faction;
             PlayerHandler.RegisterPlayer(this);

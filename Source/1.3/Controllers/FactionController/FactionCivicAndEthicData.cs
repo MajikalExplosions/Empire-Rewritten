@@ -16,7 +16,11 @@ namespace Empire_Rewritten.Controllers
         [UsedImplicitly]
         public FactionCivicAndEthicData() { }
 
-        public FactionCivicAndEthicData(Faction faction, IEnumerable<CivicDef> civics, IEnumerable<EthicDef> ethics)
+        public FactionCivicAndEthicData(
+            [NotNull] Faction faction,
+            [NotNull] [ItemNotNull] IEnumerable<CivicDef> civics,
+            [NotNull] [ItemNotNull] IEnumerable<EthicDef> ethics
+        )
         {
             Faction = faction;
             Civics = civics.ToList();
@@ -32,12 +36,16 @@ namespace Empire_Rewritten.Controllers
         ///     The <see cref="CivicDef">CivicDefs</see> of <see cref="FactionCivicAndEthicData" />'s
         ///     <see cref="FactionCivicAndEthicData.Faction" />
         /// </summary>
+        [NotNull]
+        [ItemNotNull]
         public List<CivicDef> Civics { get; } = new List<CivicDef>();
 
         /// <summary>
         ///     The <see cref="EthicDef">EthicDefs</see> of <see cref="FactionCivicAndEthicData" />'s
         ///     <see cref="FactionCivicAndEthicData.Faction" />
         /// </summary>
+        [NotNull]
+        [ItemNotNull]
         public List<EthicDef> Ethics { get; } = new List<EthicDef>();
 
         public void ExposeData()

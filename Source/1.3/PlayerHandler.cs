@@ -1,12 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Empire_Rewritten.Controllers;
+using JetBrains.Annotations;
 
 namespace Empire_Rewritten
 {
     public static class PlayerHandler
     {
-        private static List<BasePlayer> _players = new List<BasePlayer>();
+        [NotNull] [ItemNotNull] private static readonly List<BasePlayer> Players = new List<BasePlayer>();
 
         private static int _tick;
 
@@ -15,18 +17,23 @@ namespace Empire_Rewritten
         public static void Initialize(FactionController _)
         {
             _hasRegisteredUser = false;
-            _players = new List<BasePlayer>();
+            Players.Clear();
 
             UpdateController controller = UpdateController.CurrentWorldInstance;
+
+            if (controller == null)
+            {
+                throw new NullReferenceException("Tried to initialize PlayerHandler without a valid UpdateController!");
+            }
 
             controller.AddUpdateCall(MakeMoves, DoPlayerTick);
             controller.AddUpdateCall(MakeThreadedMoves, DoPlayerTick);
             controller.AddUpdateCall(RegisterPlayerFactionAsPlayer, ShouldRegisterPlayerFaction);
         }
 
-        public static void RegisterPlayer(BasePlayer basePlayer)
+        public static void RegisterPlayer([NotNull] BasePlayer player)
         {
-            _players.Add(basePlayer);
+            Players.Add(player);
         }
 
         private static bool DoPlayerTick()
@@ -43,9 +50,8 @@ namespace Empire_Rewritten
 
         public static void MakeMoves(FactionController controller)
         {
-            for (int i = 0; i < _players.Count; i++)
+            foreach (BasePlayer player in Players)
             {
-                BasePlayer player = _players[i];
                 if (player.ShouldExecute())
                 {
                     player.MakeMove(controller);
@@ -55,9 +61,9 @@ namespace Empire_Rewritten
 
         public static void MakeThreadedMoves(FactionController controller)
         {
-            for (int i = 0; i < _players.Count; i++)
+            for (int i = 0; i < Players.Count; i++)
             {
-                BasePlayer player = _players[i];
+                BasePlayer player = Players[i];
 
                 void RunThreadedMove()
                 {
@@ -71,7 +77,7 @@ namespace Empire_Rewritten
             }
         }
 
-        public static void RegisterPlayerFactionAsPlayer(FactionController factionController)
+        public static void RegisterPlayerFactionAsPlayer([NotNull] FactionController factionController)
         {
             factionController.CreatePlayer();
         }

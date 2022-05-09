@@ -10,4 +10,5 @@
 	<Empire_SPW_NoResources>You cannot afford to build a settlement!</Empire_SPW_NoResources>
 	<Empire_SPW_ColonyCost>Colony cost:</Empire_SPW_ColonyCost>
 	<Empire_SPW_MultipleErrors>There are multiple reasons as to why you can't place a colony here. Hover over the "Settle" button to see them all.</Empire_SPW_MultipleErrors>
+	<Empire_SPW_NoTerritory>You faction does not hold any territory</Empire_SPW_NoTerritory>
 </LanguageData>

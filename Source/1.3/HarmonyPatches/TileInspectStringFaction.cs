@@ -8,7 +8,7 @@ namespace Empire_Rewritten.HarmonyPatches
     {
         public static void AppendFactionToTileInspectString(ref string __result)
         {
-            Faction tileOwner = TerritoryManager.GetTerritoryManager.GetTileOwner(Find.WorldSelector.selectedTile);
+            Faction tileOwner = TerritoryManager.CurrentInstance?.GetTileOwner(Find.WorldSelector.selectedTile);
             if (tileOwner != null)
             {
                 __result += "\n" + "Faction".TranslateSimple() + ": " + tileOwner.Name;

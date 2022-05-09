@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Empire_Rewritten.Resources;
+using JetBrains.Annotations;
 using RimWorld.Planet;
 using Verse;
 
@@ -7,25 +8,20 @@ namespace Empire_Rewritten.AI
 {
     public class AIResourceManager : AIModule
     {
-        private readonly List<ResourceDef> criticalResources = new List<ResourceDef>();
-        private readonly AIPlayer parentPlayer;
+        public AIResourceManager([NotNull] AIPlayer player) : base(player) { }
 
-        public AIResourceManager(AIPlayer player) : base(player)
-        {
-            parentPlayer = player;
-        }
+        [NotNull] [ItemNotNull] public List<ResourceDef> CriticalResources { get; } = new List<ResourceDef>();
+        [NotNull] [ItemNotNull] public List<ResourceDef> ExcessResources { get; } = new List<ResourceDef>();
+        [NotNull] [ItemNotNull] public List<ResourceDef> LowResources { get; } = new List<ResourceDef>();
 
-        public List<ResourceDef> ExcessResources { get; } = new List<ResourceDef>();
-
-        public List<ResourceDef> LowResources { get; private set; } = new List<ResourceDef>();
-
-        public bool HasCriticalResource => criticalResources.Count > 0;
+        public bool HasCriticalResource => CriticalResources.Count > 0;
 
         /// <summary>
         ///     Figure out what resources are "low" in production based on the amount being produced.
         ///     LowResourceDecider changes the low value.
         /// </summary>
         /// <returns>Any resource below LowResourceDecider, or the lowest resource.</returns>
+        [NotNull]
         public List<ResourceDef> FindLowResources()
         {
             List<ResourceDef> result = new List<ResourceDef>();
@@ -45,7 +41,7 @@ namespace Empire_Rewritten.AI
                         resourceBelowDecider = true;
                         if (producedKnown[def] < def.desiredAIMinimum / 2f)
                         {
-                            criticalResources.Add(def);
+                            CriticalResources.Add(def);
                         }
                     }
                 }
@@ -54,7 +50,7 @@ namespace Empire_Rewritten.AI
                 {
                     result.Add(def);
                     resourceBelowDecider = true;
-                    criticalResources.Add(def);
+                    CriticalResources.Add(def);
                 }
             }
 
@@ -66,12 +62,12 @@ namespace Empire_Rewritten.AI
                  */
                 float lowest = 0;
                 bool first = true;
-                foreach (ResourceDef def in producedKnown.Keys)
+                foreach ((ResourceDef def, float produced) in producedKnown)
                 {
-                    if (producedKnown[def] <= lowest || (lowest == 0 && first))
+                    if (produced <= lowest || (lowest == 0 && first))
                     {
                         first = false;
-                        lowest = producedKnown[def];
+                        lowest = produced;
                         result.Add(def);
                     }
                 }
@@ -85,14 +81,16 @@ namespace Empire_Rewritten.AI
         ///     HighResourceDecider changes the excess value.
         /// </summary>
         /// <returns>Any resource below HighResourceDecider.</returns>
+        [NotNull]
+        [ItemNotNull]
         public List<ResourceDef> FindExcessResources()
         {
             List<ResourceDef> result = new List<ResourceDef>();
-            Dictionary<ResourceDef, float> producedknown = AllResourcesProduced();
+            Dictionary<ResourceDef, float> producedKnown = AllResourcesProduced();
 
-            foreach (ResourceDef def in producedknown.Keys)
+            foreach ((ResourceDef def, float produced) in producedKnown)
             {
-                if (producedknown.ContainsKey(def) && producedknown[def] >= def.desiredAIMaximum)
+                if (produced >= def?.desiredAIMaximum)
                 {
                     result.Add(def);
                 }
@@ -108,19 +106,20 @@ namespace Empire_Rewritten.AI
         /// <returns></returns>
         public float GetAmountProduced(ResourceDef def)
         {
-            Dictionary<ResourceDef, float> knownResources = AllResourcesProduced();
-            float result = knownResources.ContainsKey(def) ? knownResources[def] : 0;
-            return result;
+            return AllResourcesProduced().TryGetValue(def);
         }
 
         /// <summary>
         ///     Find all resources produced.
         /// </summary>
         /// <returns></returns>
+        [NotNull]
         public Dictionary<ResourceDef, float> AllResourcesProduced()
         {
-            Dictionary<ResourceDef, ResourceModifier> modifiers = parentPlayer.Manager.ResourceModifiersFromAllFacilities();
             Dictionary<ResourceDef, float> result = new Dictionary<ResourceDef, float>();
+            if (player.Empire == null) return result;
+
+            Dictionary<ResourceDef, ResourceModifier> modifiers = player.Empire.ResourceModifiersFromAllFacilities();
             foreach (ResourceDef def in DefDatabase<ResourceDef>.AllDefsListForReading)
             {
                 if (modifiers.ContainsKey(def))
@@ -148,17 +147,15 @@ namespace Empire_Rewritten.AI
         ///     Resources AI has excess of = lower weight
         /// </summary>
         /// <returns></returns>
-        public float GetTileResourceWeight(Tile tile)
+        public float GetTileResourceWeight([NotNull] Tile tile)
         {
-            //TODO: When TerritoryManager is implemented, only pull from owned tiles.
-
             float weight = 0;
             foreach (ResourceDef resourceDef in LowResources)
             {
                 weight += resourceDef.GetTileModifier(tile).TotalProduced();
             }
 
-            foreach (ResourceDef resourceDef in criticalResources)
+            foreach (ResourceDef resourceDef in CriticalResources)
             {
                 weight += resourceDef.GetTileModifier(tile).TotalProduced() * 5;
             }
@@ -173,14 +170,14 @@ namespace Empire_Rewritten.AI
 
         public override void DoThreadableAction()
         {
-            if (!criticalResources.EnumerableNullOrEmpty())
+            if (!CriticalResources.EnumerableNullOrEmpty())
             {
                 Dictionary<ResourceDef, float> resourcesProduced = AllResourcesProduced();
-                criticalResources.RemoveAll(x => resourcesProduced.ContainsKey(x) && resourcesProduced[x] > x.desiredAIMinimum / 2f);
+                CriticalResources.RemoveAll(resource => resource != null && resourcesProduced.TryGetValue(resource) > resource.desiredAIMinimum / 2f);
             }
 
             LowResources.Clear();
-            LowResources = FindLowResources();
+            LowResources.AddRange(FindLowResources());
             ExcessResources.Clear();
             FindExcessResources();
         }

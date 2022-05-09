@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using JetBrains.Annotations;
 using Verse;
 
 namespace Empire_Rewritten.Facilities.FacilityWorkers
@@ -7,12 +9,10 @@ namespace Empire_Rewritten.Facilities.FacilityWorkers
     {
         public TestWorker(FacilityDef facilityDef) : base(facilityDef) { }
 
+        [NotNull]
         public override IEnumerable<Gizmo> GetGizmos()
         {
-            foreach (Gizmo gizmo in base.GetGizmos())
-            {
-                yield return gizmo;
-            }
+            return base.GetGizmos() ?? Enumerable.Empty<Gizmo>();
         }
     }
 }

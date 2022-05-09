@@ -11,9 +11,12 @@ namespace Empire_Rewritten.HarmonyPatches
 
         public static void Postfix(WidgetRow row, bool worldView)
         {
-            if (worldView)
+            if (worldView && row != null)
             {
-                row.ToggleableIcon(ref _showTerritories, TexButton.ShowExpandingIcons, "Empire_ToggleTerritoriesView".TranslateSimple(), SoundDefOf.Mouseover_ButtonToggle);
+                row.ToggleableIcon(ref _showTerritories,
+                                   TexButton.ShowExpandingIcons,
+                                   "Empire_ToggleTerritoriesView".TranslateSimple(),
+                                   SoundDefOf.Mouseover_ButtonToggle);
             }
         }
     }

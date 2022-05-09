@@ -96,19 +96,23 @@ namespace Empire_Rewritten.Controllers
         /// <summary>
         ///     Whether the <seealso cref="UpdateControllerAction.action" /> can be discarded
         /// </summary>
+        [NotNull]
         private Func<bool> ShouldDiscard { get; }
 
         /// <summary>
         ///     The <see cref="Func{TResult}" /> that determines if the <see cref="UpdateControllerAction.action" /> should be
         ///     executed
         /// </summary>
+        [NotNull]
         private Func<bool> ShouldExecute { get; }
 
+        [NotNull]
         private Func<bool> ShouldDiscardDefault(int maxExecutions)
         {
             return () => maxExecutions > 0 && useCounter >= maxExecutions;
         }
 
+        [NotNull]
         private Func<bool> ShouldExecuteDefault(int tickInterval)
         {
             return () => Find.TickManager.TicksGame % tickInterval == 0;
@@ -128,7 +132,7 @@ namespace Empire_Rewritten.Controllers
             bool shouldExecute = ShouldExecute();
             if (shouldExecute)
             {
-                action(factionController);
+                action?.Invoke(factionController);
                 useCounter++;
             }
 

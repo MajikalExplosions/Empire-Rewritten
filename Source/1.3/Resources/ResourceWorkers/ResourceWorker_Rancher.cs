@@ -7,7 +7,7 @@ namespace Empire_Rewritten.Resources.ResourceWorkers
     [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
     public class ResourceWorker_Rancher : ResourceWorker
     {
-        public ResourceWorker_Rancher(ThingFilter filter) : base(filter) { }
+        public ResourceWorker_Rancher([NotNull] ThingFilter filter) : base(filter) { }
 
         /// <summary>
         ///     Allows all animals marked as <see cref="RaceProperties.Roamer" /> to be produced through ranching
@@ -17,6 +17,7 @@ namespace Empire_Rewritten.Resources.ResourceWorkers
         {
             foreach (PawnKindDef def in DefDatabase<PawnKindDef>.AllDefsListForReading.Where(def => def.RaceProps?.Roamer == true))
             {
+                if (def == null) continue;
                 filter.SetAllow(def.race, true);
             }
 

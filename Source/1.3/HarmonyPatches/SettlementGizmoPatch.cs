@@ -2,6 +2,7 @@
 using System.Linq;
 using Empire_Rewritten.Facilities;
 using Empire_Rewritten.Settlements;
+using JetBrains.Annotations;
 using RimWorld.Planet;
 using Verse;
 
@@ -12,7 +13,7 @@ namespace Empire_Rewritten.HarmonyPatches
         /// <summary>
         ///     Adds <see cref="Facility" /> <see cref="Gizmo">Gizmos</see> to gizmos of a <see cref="Settlement" />.
         /// </summary>
-        public static void GizmoPatch(Settlement __instance, ref IEnumerable<Gizmo> __result)
+        public static void GizmoPatch([NotNull] Settlement __instance, [NotNull] ref IEnumerable<Gizmo> __result)
         {
             __result = __result.Concat(__instance.GetExtendedGizmos());
         }

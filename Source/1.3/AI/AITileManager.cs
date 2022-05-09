@@ -1,25 +1,22 @@
 ﻿using System.Collections.Generic;
 using Empire_Rewritten.Territories;
+using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
+using Logger = Empire_Rewritten.Utils.Logger;
 
 namespace Empire_Rewritten.AI
 {
     public class AITileManager : AIModule
     {
-        private static WorldGrid _worldGrid;
-
-        private readonly Dictionary<int, float> tileWeights = new Dictionary<int, float>();
+        [NotNull] private readonly Dictionary<int, float> tileWeights = new Dictionary<int, float>();
         private TechLevel cachedTechLevel = TechLevel.Undefined;
 
-        public AITileManager(AIPlayer player) : base(player)
-        {
-            _worldGrid = Find.WorldGrid;
-        }
+        public AITileManager([NotNull] AIPlayer player) : base(player) { }
 
-        public IEnumerable<int> GetTiles => tileWeights.Keys;
+        [NotNull] public IEnumerable<int> AllTiles => tileWeights.Keys;
 
         public TechLevel TechLevel
         {
@@ -46,10 +43,15 @@ namespace Empire_Rewritten.AI
 
         private float CalculateTileWeight(int id)
         {
+            if (TerritoryManager.CurrentInstance?.FactionOwnsTile(player.Faction, id) ?? false)
+            {
+                return float.NegativeInfinity;
+            }
+
             AIResourceManager aIResourceManager = player.ResourceManager;
             Tile tile = Find.WorldGrid[id];
             //The weight from a tile's resources.
-            float weight = aIResourceManager.GetTileResourceWeight(tile);
+            float resourceWeight = aIResourceManager.GetTileResourceWeight(tile);
 
             //Neolithic AI should not have pin point actions, while spacer AI should be better at understanding resources.
             float techWeight = (float)(TechLevel - 4) * Random.Range(1, 10);
@@ -70,7 +72,7 @@ namespace Empire_Rewritten.AI
                 Settlement settlement = Find.WorldObjects.SettlementAt(other);
                 if (settlement != null)
                 {
-                    int dist = _worldGrid.TraversalDistanceBetween(id, other);
+                    int dist = Find.WorldGrid.TraversalDistanceBetween(id, other);
 
                     if (dist < smallestDist || !foundASettlement)
                     {
@@ -98,15 +100,19 @@ namespace Empire_Rewritten.AI
                 }
             }
             */
-            
 
-            weight += techWeight + hillinessOffsetWeight + randomOffsetWeight + distanceWeight;
-            return weight;
+            return resourceWeight + techWeight + hillinessOffsetWeight + randomOffsetWeight + distanceWeight;
         }
 
         public void CalculateAllUnknownTiles()
         {
-            IEnumerable<int> tiles = TerritoryManager.GetTerritoryManager.GetTerritory(player.Faction).Tiles.ListFullCopy();
+            if (TerritoryManager.CurrentInstance == null)
+            {
+                Logger.Warn($"{nameof(TerritoryManager)}.{nameof(TerritoryManager.CurrentInstance)} is null.");
+                return;
+            }
+
+            List<int> tiles = TerritoryManager.CurrentInstance.GetTerritory(player.Faction).Tiles;
             int counter = 0;
             foreach (int tile in tiles)
             {

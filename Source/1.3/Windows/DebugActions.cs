@@ -10,14 +10,14 @@ namespace Empire_Rewritten.Windows
         [DebugAction("Empire", "Resource info window", allowedGameStates = AllowedGameStates.Entry)]
         public static void DisplayResourceInfoWindow()
         {
-            Find.WindowStack.Add(new ResourceInfoWindow());
+            Find.WindowStack?.Add(new ResourceInfoWindow());
         }
 
         [PublicAPI]
         [DebugAction("Empire", "Facility info window", allowedGameStates = AllowedGameStates.Entry)]
         public static void FacilityInfoWindow()
         {
-            Find.WindowStack.Add(new FacilityInfoWindow());
+            Find.WindowStack?.Add(new FacilityInfoWindow());
         }
 
         [PublicAPI]
@@ -26,21 +26,21 @@ namespace Empire_Rewritten.Windows
         {
             Color color = Color.green;
             Color[] colors = new Color[10];
-            Find.WindowStack.Add(new ColorPickerWindow(color, colors, (_) => { }, (_) => { }));
+            Find.WindowStack?.Add(new ColorPickerWindow(color, colors, _ => { }, _ => { }));
         }
 
         [PublicAPI]
         [DebugAction("Empire", "Player empire creation window", allowedGameStates = AllowedGameStates.Playing)]
         public static void PlayerCreationWindow()
         {
-            Find.WindowStack.Add(new PlayerFactionCreationWindow());
+            Find.WindowStack?.Add(new PlayerFactionCreationWindow());
         }
 
         [PublicAPI]
         [DebugAction("Empire", "Settlement creation window", allowedGameStates = AllowedGameStates.Playing)]
         public static void SettlementCreationWindow()
         {
-            Find.WindowStack.Add(new SettlementPlacementWindow());
+            Find.WindowStack?.Add(new SettlementPlacementWindow());
         }
     }
 }

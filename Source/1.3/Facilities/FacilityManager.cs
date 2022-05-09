@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Empire_Rewritten.Resources;
+using Empire_Rewritten.Utils;
 using JetBrains.Annotations;
 using RimWorld.Planet;
 using Verse;
@@ -13,17 +14,17 @@ namespace Empire_Rewritten.Facilities
     /// </summary>
     public class FacilityManager : IExposable
     {
-        private readonly List<Gizmo> gizmos = new List<Gizmo>();
         private readonly bool refreshFacilityCount = true;
-        private List<ResourceModifier> cachedModifiers = new List<ResourceModifier>();
-        private int facilityCount;
-        private Dictionary<FacilityDef, Facility> installedFacilities = new Dictionary<FacilityDef, Facility>();
+        [NotNull] [ItemNotNull] private readonly List<Gizmo> gizmos = new List<Gizmo>();
         private bool refreshGizmos = true;
         private bool refreshModifiers = true;
-        private Settlement settlement;
+        [NotNull] private Dictionary<FacilityDef, Facility> installedFacilities = new Dictionary<FacilityDef, Facility>();
+        private int facilityCount;
         private int stage = 1;
+        [NotNull] private List<ResourceModifier> cachedModifiers = new List<ResourceModifier>();
+        [NotNull] private Settlement settlement;
 
-        public FacilityManager(Settlement settlement)
+        public FacilityManager([NotNull] Settlement settlement)
         {
             this.settlement = settlement;
         }
@@ -34,6 +35,7 @@ namespace Empire_Rewritten.Facilities
         /// <summary>
         ///     All <see cref="ResourceModifier">ResourceModifiers</see> from installed <see cref="Facility">Facilities</see>.
         /// </summary>
+        [NotNull]
         public IEnumerable<ResourceModifier> Modifiers
         {
             get
@@ -50,6 +52,8 @@ namespace Empire_Rewritten.Facilities
         /// <summary>
         ///     Installed <see cref="FacilityDef">FacilityDefs</see>
         /// </summary>
+        [NotNull]
+        [ItemNotNull]
         public IEnumerable<FacilityDef> FacilityDefsInstalled => installedFacilities.Keys;
 
         public bool IsFullyUpgraded => stage >= 10;
@@ -65,7 +69,7 @@ namespace Empire_Rewritten.Facilities
                     int count = 0;
                     foreach (Facility facility in installedFacilities.Values)
                     {
-                        count += facility.Amount;
+                        count += facility?.Amount ?? 0;
                     }
 
                     facilityCount = count;
@@ -96,7 +100,8 @@ namespace Empire_Rewritten.Facilities
             refreshGizmos = false;
             foreach (Facility facility in installedFacilities.Values)
             {
-                gizmos.AddRange(facility.FacilityWorker.GetGizmos());
+                if (facility == null) continue;
+                gizmos.AddRange(facility.FacilityWorker?.GetGizmos() ?? Enumerable.Empty<Gizmo>());
             }
 
             return gizmos;
@@ -111,6 +116,8 @@ namespace Empire_Rewritten.Facilities
 
             foreach (Facility facility in installedFacilities.Values)
             {
+                if (facility == null) continue;
+
                 foreach (ResourceModifier modifier in facility.ResourceModifiers)
                 {
                     if (calculatedModifiers.ContainsKey(modifier.def))
@@ -145,11 +152,11 @@ namespace Empire_Rewritten.Facilities
         ///     <see cref="FacilityManager.settlement" />
         /// </summary>
         /// <param name="facilityDef">The <see cref="FacilityDef" /> to add</param>
-        public void AddFacility(FacilityDef facilityDef)
+        public void AddFacility([NotNull] FacilityDef facilityDef)
         {
             if (installedFacilities.ContainsKey(facilityDef))
             {
-                installedFacilities[facilityDef].AddFacility();
+                installedFacilities[facilityDef]?.AddFacility();
             }
             else
             {
@@ -163,13 +170,19 @@ namespace Empire_Rewritten.Facilities
         ///     <see cref="FacilityManager" />'s <see cref="FacilityManager.settlement" />
         /// </summary>
         /// <param name="facilityDef">The <see cref="FacilityDef" /> to remove</param>
-        public void RemoveFacility(FacilityDef facilityDef)
+        public void RemoveFacility([NotNull] FacilityDef facilityDef)
         {
-            if (!installedFacilities.ContainsKey(facilityDef)) return;
+            Facility installed = installedFacilities.TryGetValue(facilityDef);
+            if (installed == null) return;
 
-            installedFacilities[facilityDef].RemoveFacility();
-            if (installedFacilities[facilityDef].FacilitiesInstalled <= 0)
+            installed.RemoveFacility();
+            if (installed.Amount <= 0)
             {
+                if (installed.Amount < 0)
+                {
+                    Logger.Warn("FacilityManager.RemoveFacility: Amount of " + facilityDef.defName + " is negative!");
+                }
+
                 installedFacilities.Remove(facilityDef);
                 SetDataDirty(true);
             }
@@ -181,9 +194,9 @@ namespace Empire_Rewritten.Facilities
         /// </summary>
         /// <param name="facilityDef">The <see cref="FacilityDef" /> to check for</param>
         /// <returns>Whether <paramref name="facilityDef" /> is installed here</returns>
-        public bool HasFacility(FacilityDef facilityDef)
+        public bool HasFacility([CanBeNull] FacilityDef facilityDef)
         {
-            return installedFacilities.ContainsKey(facilityDef);
+            return facilityDef != null && installedFacilities.ContainsKey(facilityDef);
         }
     }
 }

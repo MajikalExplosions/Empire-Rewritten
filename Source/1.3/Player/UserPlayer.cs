@@ -1,31 +1,30 @@
 ﻿using System;
 using Empire_Rewritten.Controllers;
 using Empire_Rewritten.Settlements;
+using JetBrains.Annotations;
 using RimWorld;
 
 namespace Empire_Rewritten.Player
 {
     public class UserPlayer : BasePlayer
     {
-        private Empire cachedManager;
-        private bool managerIsDirty;
+        private bool cacheIsDirty;
+        private Empire cachedEmpire;
 
-        public UserPlayer(Faction faction) : base(faction) { }
+        public UserPlayer([NotNull] Faction faction) : base(faction) { }
 
-        public Empire Manager
+        [CanBeNull]
+        public Empire Empire
         {
             get
             {
-                if (cachedManager == null || managerIsDirty)
+                if (cachedEmpire == null || cacheIsDirty)
                 {
-                    managerIsDirty = false;
-                    UpdateController updateController = UpdateController.CurrentWorldInstance;
-                    FactionController factionController = updateController.FactionController;
-
-                    cachedManager = factionController.GetOwnedSettlementManager(faction);
+                    cacheIsDirty = false;
+                    cachedEmpire = UpdateController.CurrentWorldInstance?.FactionController?.GetOwnedEmpire(faction);
                 }
 
-                return cachedManager;
+                return cachedEmpire;
             }
         }
 

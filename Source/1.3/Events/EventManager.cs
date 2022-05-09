@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Empire_Rewritten.Controllers;
 using Empire_Rewritten.Settlements;
+using Empire_Rewritten.Utils;
+using JetBrains.Annotations;
 using RimWorld;
 using Verse;
 
@@ -10,48 +11,56 @@ namespace Empire_Rewritten.Events
 {
     public class EventManager : IExposable
     {
-        private static readonly Random rand = new Random();
-        private static List<EventDef> cachedEvents = new List<EventDef>();
-        private static int lastDay;
+        [NotNull] private static readonly Random Rand = new Random();
+        private static int _lastDay;
 
         public EventManager()
         {
-            UpdateController.CurrentWorldInstance.AddUpdateCall(DoRandomEventOnRandomEmpire, ShouldFireEvent);
-            cachedEvents = DefDatabase<EventDef>.AllDefsListForReading;
+            UpdateController.CurrentWorldInstance?.AddUpdateCall(DoRandomEventOnRandomEmpire, ShouldFireEvent);
         }
 
         public void ExposeData()
         {
-            Scribe_Values.Look(ref lastDay, nameof(lastDay));
+            Scribe_Values.Look(ref _lastDay, "lastDay");
         }
 
         public static bool ShouldFireEvent()
         {
             int passedDays = GenDate.DaysPassed;
 
-            if (passedDays - lastDay > FactionController.daysPerTurn)
+            if (passedDays - _lastDay > FactionController.DaysPerTurn)
             {
-                lastDay = passedDays;
+                _lastDay = passedDays;
                 return true;
             }
 
             return false;
         }
 
-        public static void DoRandomEventOnRandomEmpire(FactionController controller)
+        public static void DoRandomEventOnRandomEmpire([NotNull] FactionController controller)
         {
-            Empire empire;
-            empire = controller.ReadOnlyFactionSettlementData.RandomElement().SettlementManager;
+            Empire empire = controller.ReadOnlyFactionSettlementData.RandomElement()?.Empire;
+
+            if (empire == null)
+            {
+                Logger.Warn("Faction doesn't have Empire to fire event on!");
+                return;
+            }
 
             FireRandomEvent(empire);
         }
 
-        public static void FireRandomEvent(Empire empire)
+        public static void FireRandomEvent([NotNull] Empire empire)
         {
-            EventDef def = cachedEvents.Where(x => !empire.IsAIPlayer || x.canAffectAI).RandomElement();
+            EventDef def = DefDatabase<EventDef>.AllDefsListForReading.Where(eventDef => !empire.IsAIPlayer || eventDef.canAffectAI).RandomElement();
+            if (def == null)
+            {
+                Logger.Warn("No events to fire found!");
+                return;
+            }
 
             EventWorker worker = empire.IsAIPlayer ? def.AIWorker : def.EventWorker;
-            if (worker.Chance > rand.Next(0, 100))
+            if (worker?.Chance > Rand.Next(0, 100))
             {
                 worker.Event(empire);
             }

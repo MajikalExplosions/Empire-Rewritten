@@ -8,25 +8,29 @@ namespace Empire_Rewritten.Territories
 {
     public class TerritoryManager : IExposable
     {
-        private List<Territory> territories = new List<Territory>();
-        private Dictionary<Faction, int> territoryIDs = new Dictionary<Faction, int>();
-
-        private List<Faction> territoryIDsKeysListForSaving = new List<Faction>();
-        private List<int> territoryIDsValuesListForSaving = new List<int>();
+        [NotNull] private Dictionary<Faction, int> territoryIDs = new Dictionary<Faction, int>();
+        [NotNull] [ItemNotNull] private List<Faction> territoryIDsKeysListForSaving = new List<Faction>();
+        [NotNull] private List<int> territoryIDsValuesListForSaving = new List<int>();
+        [NotNull] [ItemNotNull] private List<Territory> territories = new List<Territory>();
 
         public TerritoryManager()
         {
-            GetTerritoryManager = this;
+            CurrentInstance = this;
         }
 
-        public List<Territory> Territories => territories;
+        [NotNull] [ItemNotNull] public List<Territory> Territories => territories;
 
-        public static TerritoryManager GetTerritoryManager { get; private set; }
+        [CanBeNull] public static TerritoryManager CurrentInstance { get; private set; }
 
         public void ExposeData()
         {
             Scribe_Collections.Look(ref territories, "territories");
-            Scribe_Collections.Look(ref territoryIDs, "territoryIDs", LookMode.Reference, LookMode.Value, ref territoryIDsKeysListForSaving, ref territoryIDsValuesListForSaving);
+            Scribe_Collections.Look(ref territoryIDs,
+                                    "territoryIDs",
+                                    LookMode.Reference,
+                                    LookMode.Value,
+                                    ref territoryIDsKeysListForSaving,
+                                    ref territoryIDsValuesListForSaving);
         }
 
         /// <summary>
@@ -55,8 +59,7 @@ namespace Empire_Rewritten.Territories
 
         public bool FactionOwnsTile([NotNull] Faction faction, int tile)
         {
-            Territory territory = GetTerritory(faction);
-            return territory != null && territory.Tiles.Contains(tile);
+            return GetTerritory(faction) is Territory territory && territory.Tiles.Contains(tile);
         }
 
         public bool HasFactionRegistered([NotNull] Faction faction)
@@ -69,6 +72,7 @@ namespace Empire_Rewritten.Territories
             return territoryIDs.ContainsKey(faction);
         }
 
+        [NotNull]
         public Territory GetTerritory([NotNull] Faction faction)
         {
             if (faction is null)

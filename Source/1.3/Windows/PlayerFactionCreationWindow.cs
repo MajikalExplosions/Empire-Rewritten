@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Empire_Rewritten.Controllers;
+﻿using Empire_Rewritten.Controllers;
 using Empire_Rewritten.Utils;
 using RimWorld;
 using UnityEngine;
@@ -13,20 +8,16 @@ namespace Empire_Rewritten.Windows
 {
     public class PlayerFactionCreationWindow : Window
     {
-        private readonly Rect rectFull = new Rect(0f, 0f, 1000f, 600f);
-        private readonly Rect rectMain;
-        private readonly Rect rectLeft;
-        private readonly Rect rectLeftNameLabel;
-        private readonly Rect rectLeftNameInput;
-        private readonly Rect rectTopPart;
-        private readonly Rect rectMiddlePart;
         private readonly Rect rectBottomPart;
+        private readonly Rect rectFull = new Rect(0f, 0f, 1000f, 600f);
+        private readonly Rect rectLeft;
+        private readonly Rect rectLeftNameInput;
+        private readonly Rect rectLeftNameLabel;
+        private readonly Rect rectMain;
+        private readonly Rect rectMiddlePart;
+        private readonly Rect rectTopPart;
 
         private string playerFactionName = Faction.OfPlayer.Name;
-
-        public override Vector2 InitialSize => rectFull.size;
-
-        protected override float Margin => 0f;
 
         public PlayerFactionCreationWindow()
         {
@@ -46,6 +37,10 @@ namespace Empire_Rewritten.Windows
             rectLeftNameInput = rectLeftNameLabel.MoveRect(new Vector2(0f, rectLeftNameLabel.height + 5f));
         }
 
+        public override Vector2 InitialSize => rectFull.size;
+
+        protected override float Margin => 0f;
+
         public override void DoWindowContents(Rect inRect)
         {
             Text.Font = GameFont.Medium;
@@ -58,18 +53,20 @@ namespace Empire_Rewritten.Windows
             playerFactionName = Widgets.TextField(rectLeftNameInput, playerFactionName, 25, CharacterCardUtility.ValidNameRegex);
 
             Widgets.DrawLineHorizontal(rectBottomPart.x, rectBottomPart.y, rectBottomPart.width);
-            new Rect(rectBottomPart.x, rectBottomPart.y + 5f, rectBottomPart.width, rectBottomPart.height - 10f).DrawButtonText("Empire_CPF_Apply".Translate(), ApplyAction);
+            new Rect(rectBottomPart.x, rectBottomPart.y + 5f, rectBottomPart.width, rectBottomPart.height - 10f).DrawButtonText(
+                "Empire_CPF_Apply".Translate(),
+                ApplyAction);
         }
 
         public void ApplyAction()
         {
-            if (playerFactionName.NullOrEmpty() && Faction.OfPlayer!=null)
+            if (playerFactionName.NullOrEmpty())
+            {
                 return;
+            }
 
             Faction.OfPlayer.Name = playerFactionName;
-            UpdateController updateController = UpdateController.CurrentWorldInstance;
-            FactionController controller = updateController.FactionController;
-            controller.CreatePlayer();
+            UpdateController.CurrentWorldInstance?.FactionController?.CreatePlayer();
 
             Close();
         }

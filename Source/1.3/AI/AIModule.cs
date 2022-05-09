@@ -1,10 +1,12 @@
-﻿namespace Empire_Rewritten.AI
+﻿using JetBrains.Annotations;
+
+namespace Empire_Rewritten.AI
 {
     public abstract class AIModule
     {
-        public AIPlayer player;
+        [NotNull] public AIPlayer player;
 
-        public AIModule(AIPlayer player)
+        public AIModule([NotNull] AIPlayer player)
         {
             this.player = player;
         }

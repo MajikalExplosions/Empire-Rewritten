@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Empire_Rewritten.Resources;
 using Empire_Rewritten.Utils;
+using JetBrains.Annotations;
 using Verse;
 
 namespace Empire_Rewritten
@@ -8,7 +9,7 @@ namespace Empire_Rewritten
     public class StorageTracker : IExposable, ILoadReferenceable
     {
         // For AI use
-        private Dictionary<ThingDef, int> storedThings = new Dictionary<ThingDef, int>();
+        [NotNull] private Dictionary<ThingDef, int> storedThings = new Dictionary<ThingDef, int>();
 
         public Dictionary<ResourceDef, int> ApproximateResources { get; } = new Dictionary<ResourceDef, int>();
 
@@ -29,7 +30,7 @@ namespace Empire_Rewritten
         /// </summary>
         /// <param name="def">The <see cref="ThingDef" /> to add</param>
         /// <param name="count">The <see cref="int">amount</see> of <paramref name="def" /> to add</param>
-        public void AddThingsToStorage(ThingDef def, int count)
+        public void AddThingsToStorage([NotNull] ThingDef def, int count)
         {
             if (storedThings.ContainsKey(def))
             {
@@ -41,15 +42,20 @@ namespace Empire_Rewritten
             }
         }
 
-
-
-        public bool TryRemoveThingsFromStorage(Dictionary<ThingDef, int> things)
+        public bool TryRemoveThingsFromStorage([NotNull] Dictionary<ThingDef, int> things)
         {
             bool hasRemovedThings = true;
-            foreach(KeyValuePair<ThingDef,int> kvp in things)
+            foreach (KeyValuePair<ThingDef, int> kvp in things)
             {
-               hasRemovedThings &= TryRemoveThingsFromStorage(kvp.Key, kvp.Value);
+                if (kvp.Key is null)
+                {
+                    Logger.Warn($"Trying to remove null {nameof(ThingDef)} from {nameof(StorageTracker)}");
+                    continue;
+                }
+
+                hasRemovedThings &= TryRemoveThingsFromStorage(kvp.Key, kvp.Value);
             }
+
             return hasRemovedThings;
         }
 
@@ -60,7 +66,7 @@ namespace Empire_Rewritten
         /// <param name="def">The <see cref="ThingDef" /> to try and remove</param>
         /// <param name="count">The <see cref="int">amount</see> of <paramref name="def" /> to try and remove</param>
         /// <returns>Whether the given <paramref name="count" /> of <paramref name="def" /> could successfully be removed</returns>
-        public bool TryRemoveThingsFromStorage(ThingDef def, int count)
+        public bool TryRemoveThingsFromStorage([NotNull] ThingDef def, int count)
         {
             if (!CanRemoveThingsFromStorage(def, count)) return false;
 
@@ -79,17 +85,18 @@ namespace Empire_Rewritten
         }
 
         /// <summary>
-        /// Check if we can remove a set of <see cref="ThingDef"/> from the <see cref="StorageTracker"/>.
+        ///     Check if we can remove a set of <see cref="ThingDef" /> from the <see cref="StorageTracker" />.
         /// </summary>
         /// <param name="thingsAndAmount"></param>
         /// <returns></returns>
-        public bool CanRemoveThingsFromStorage(Dictionary<ThingDef, int> thingsAndAmount)
+        public bool CanRemoveThingsFromStorage([NotNull] Dictionary<ThingDef, int> thingsAndAmount)
         {
             bool canRemove = true;
-            foreach(KeyValuePair<ThingDef, int> kvp in thingsAndAmount)
+            foreach (KeyValuePair<ThingDef, int> kvp in thingsAndAmount)
             {
-               canRemove &= CanRemoveThingsFromStorage(kvp.Key, kvp.Value);
+                canRemove &= CanRemoveThingsFromStorage(kvp.Key, kvp.Value);
             }
+
             return canRemove;
         }
 
@@ -103,9 +110,9 @@ namespace Empire_Rewritten
         ///     <c>true</c> if there's more than <paramref name="count" /> of <paramref name="def" /> contained in this
         ///     <see cref="StorageTracker" />, false otherwise
         /// </returns>
-        public bool CanRemoveThingsFromStorage(ThingDef def, int count)
+        public bool CanRemoveThingsFromStorage([CanBeNull] ThingDef def, int count)
         {
-            return GetCountOfThing(def) >= count;
+            return def != null && GetCountOfThing(def) >= count;
         }
 
         /// <summary>
@@ -113,7 +120,7 @@ namespace Empire_Rewritten
         /// </summary>
         /// <param name="def">The <see cref="ThingDef" /> to look for</param>
         /// <returns>How many of <paramref name="def" /> are contained in this <see cref="StorageTracker" />. 0 if not contained</returns>
-        public int GetCountOfThing(ThingDef def)
+        public int GetCountOfThing([NotNull] ThingDef def)
         {
             return storedThings.ContainsKey(def) ? storedThings[def] : 0;
         }
@@ -123,9 +130,9 @@ namespace Empire_Rewritten
         /// </summary>
         /// <param name="def">The <see cref="ThingDef" /> to look for</param>
         /// <returns>Whether <paramref name="def" /> is contained in this <see cref="StorageTracker" /></returns>
-        public bool ContainsThing(ThingDef def)
+        public bool ContainsThing([CanBeNull] ThingDef def)
         {
-            return storedThings.ContainsKey(def);
+            return def != null && storedThings.ContainsKey(def);
         }
     }
 }

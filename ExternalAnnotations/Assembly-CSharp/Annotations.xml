@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<assembly name="Assembly-CSharp, Version=1.3.8131.16884, Culture=neutral, PublicKeyToken=null">
+	<member name="P:Verse.Find.WindowStack">
+		<attribute ctor="M:JetBrains.Annotations.CanBeNullAttribute.#ctor()" />
+	</member>
+
+	<member name="P:RimWorld.Faction.OfPlayer">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+
+	<member name="P:Verse.Find.WorldSelector">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+
+	<member name="P:Verse.Find.WorldGrid">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+		<attribute ctor="M:JetBrains.Annotations.ItemNotNullAttribute.#ctor()" />
+	</member>
+	<member name="M:RimWorld.Planet.WorldGrid.get_Item(System.Int32)">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+	<member name="F:RimWorld.Planet.WorldGrid.tiles">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+		<attribute ctor="M:JetBrains.Annotations.ItemNotNullAttribute.#ctor()" />
+	</member>
+
+	<member name="F:Verse.ThingDefCountClass.thingDef">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+
+	<member name="F:RimWorld.Planet.WorldLayer.subMeshes">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+		<attribute ctor="M:JetBrains.Annotations.ItemNotNullAttribute.#ctor()" />
+	</member>
+
+	<member name="P:Verse.ThingFilter.AllowedThingDefs">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+		<attribute ctor="M:JetBrains.Annotations.ItemNotNullAttribute.#ctor()" />
+	</member>
+
+	<member name="F:Verse.LayerSubMesh.verts">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+		<attribute ctor="M:JetBrains.Annotations.ItemNotNullAttribute.#ctor()" />
+	</member>
+	<member name="F:Verse.LayerSubMesh.uvs">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+		<attribute ctor="M:JetBrains.Annotations.ItemNotNullAttribute.#ctor()" />
+	</member>
+	<member name="F:Verse.LayerSubMesh.tris">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+		<attribute ctor="M:JetBrains.Annotations.ItemNotNullAttribute.#ctor()" />
+	</member>
+
+	<member name="M:RimWorld.Planet.WorldLayer.GetSubMesh(UnityEngine.Material)">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+	<member name="M:RimWorld.Planet.WorldLayer.GetSubMesh(UnityEngine.Material,System.Int32@)">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+
+	<member name="F:RimWorld.Planet.Tile.biome">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+
+	<member name="P:Verse.Find.WorldPathGrid">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+	<member name="F:RimWorld.Planet.WorldPathGrid.movementDifficulty">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+		<attribute ctor="M:JetBrains.Annotations.ItemNotNullAttribute.#ctor()" />
+	</member>
+	
+	<member name="F:RimWorld.Planet.World.factionManager">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+
+	<member name="P:RimWorld.FactionManager.AllFactions">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+		<attribute ctor="M:JetBrains.Annotations.ItemNotNullAttribute.#ctor()" />
+	</member>
+
+	<member name="P:Verse.Find.WorldObjects">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+	<member name="P:RimWorld.Planet.WorldObjectsHolder.Settlements">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+		<attribute ctor="M:JetBrains.Annotations.ItemNotNullAttribute.#ctor()" />
+	</member>
+	<member name="P:RimWorld.Planet.WorldObjectsHolder.SettlementBases">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+		<attribute ctor="M:JetBrains.Annotations.ItemNotNullAttribute.#ctor()" />
+	</member>
+
+	<member name="P:Verse.Find.FactionManager">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+	<member name="P:RimWorld.FactionManager.AllFactionsListForReading">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+		<attribute ctor="M:JetBrains.Annotations.ItemNotNullAttribute.#ctor()" />
+	</member>
+
+	<member name="P:Verse.Find.TickManager">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+
+	<member name="P:Verse.DefDatabase`1.AllDefsListForReading">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+		<attribute ctor="M:JetBrains.Annotations.ItemNotNullAttribute.#ctor()" />
+	</member>
+
+	<member name="M:RimWorld.Planet.WorldObjectMaker.MakeWorldObject(RimWorld.WorldObjectDef)">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+
+	<member name="F:RimWorld.Faction.def">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+
+	<member name="F:RimWorld.ThingDefOf.WoodLog">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+	<member name="F:RimWorld.ThingDefOf.Steel">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+	<member name="F:RimWorld.ThingDefOf.ComponentIndustrial">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+	<member name="F:RimWorld.ThingDefOf.Silver">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+</assembly>

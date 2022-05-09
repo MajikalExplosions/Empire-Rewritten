@@ -1,4 +1,6 @@
-﻿namespace Empire_Rewritten.Utils
+﻿using JetBrains.Annotations;
+
+namespace Empire_Rewritten.Utils
 {
     public static class Logger
     {
@@ -37,6 +39,9 @@
         ///     Simplifies making an error message that only errors once
         /// </summary>
         /// <param name="message"></param>
-        public static void ErrorOnce(this string message) => Verse.Log.ErrorOnce(PrefixError + message, message.GetHashCode());
+        public static void ErrorOnce([NotNull] string message)
+        {
+            Verse.Log.ErrorOnce(PrefixError + message, message.GetHashCode());
+        }
     }
 }

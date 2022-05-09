@@ -10,7 +10,7 @@ namespace Empire_Rewritten.Resources.Stats
         Mountainous = 3,
         Lake = 4,
         River = 5,
-        Ocean = 6
+        Ocean = 6,
     }
 
     public static class ResourceStatExtensions

@@ -21,13 +21,13 @@ namespace Empire_Rewritten.Controllers
     /// </summary>
     public class FactionController : IExposable
     {
-        public const int daysPerTurn = 15;
+        public const int DaysPerTurn = 15;
 
-        private readonly Dictionary<Faction, AIPlayer> AIFactions = new Dictionary<Faction, AIPlayer>();
-        private readonly List<FactionCivicAndEthicData> factionCivicAndEthicDataList = new List<FactionCivicAndEthicData>();
+        [NotNull] private readonly Dictionary<Faction, AIPlayer> AIFactions = new Dictionary<Faction, AIPlayer>();
+        [NotNull] [ItemNotNull] private readonly List<FactionCivicAndEthicData> factionCivicAndEthicDataList = new List<FactionCivicAndEthicData>();
         private EventManager eventManager = new EventManager();
         private Faction playerFaction;
-        private List<FactionSettlementData> factionSettlementDataList = new List<FactionSettlementData>();
+        [NotNull] [ItemNotNull] private List<FactionSettlementData> factionSettlementDataList = new List<FactionSettlementData>();
         private TerritoryManager territoryManager = new TerritoryManager();
 
         /// <summary>
@@ -44,14 +44,14 @@ namespace Empire_Rewritten.Controllers
         ///     The <see cref="FactionSettlementData" /> instances that this
         ///     <see cref="FactionController" /> should maintain
         /// </param>
-        public FactionController(List<FactionSettlementData> factionSettlementDataList)
+        public FactionController([NotNull] List<FactionSettlementData> factionSettlementDataList)
         {
             ShouldRefreshTerritories = true;
             territoryManager = new TerritoryManager();
             this.factionSettlementDataList = factionSettlementDataList;
         }
 
-        public List<FactionSettlementData> ReadOnlyFactionSettlementData => factionSettlementDataList;
+        [NotNull] [ItemNotNull] public List<FactionSettlementData> ReadOnlyFactionSettlementData => factionSettlementDataList;
 
         public TerritoryManager TerritoryManager => territoryManager;
 
@@ -71,13 +71,13 @@ namespace Empire_Rewritten.Controllers
         /// <param name="faction"></param>
         /// <returns>The <see cref="Empire" /> owned by a given <paramref name="faction" /></returns>
         [CanBeNull]
-        public Empire GetOwnedSettlementManager(Faction faction)
+        public Empire GetOwnedEmpire(Faction faction)
         {
             foreach (FactionSettlementData factionSettlementData in factionSettlementDataList)
             {
                 if (factionSettlementData.owner == faction)
                 {
-                    return factionSettlementData.SettlementManager;
+                    return factionSettlementData.Empire;
                 }
             }
 
@@ -89,14 +89,17 @@ namespace Empire_Rewritten.Controllers
         /// </summary>
         /// <param name="faction"></param>
         /// <returns></returns>
-        public AIPlayer GetAIPlayer(Faction faction)
+        [CanBeNull]
+        public AIPlayer GetAIPlayer([NotNull] Faction faction)
         {
-            return AIFactions.ContainsKey(faction) ? AIFactions[faction] : null;
+            return AIFactions.TryGetValue(faction);
         }
 
         public void CreatePlayer()
         {
             Faction faction = Faction.OfPlayer;
+
+            if (faction is null) throw new NullReferenceException("Faction.OfPlayer is null, this should not happen");
 
             Empire playerEmpire = new Empire(faction, false);
             FactionSettlementData factionSettlementData = new FactionSettlementData(faction, playerEmpire);
@@ -105,8 +108,7 @@ namespace Empire_Rewritten.Controllers
             // NOTE: Why is this unused?
             UserPlayer player = new UserPlayer(faction);
 
-            IEnumerable<Settlement> playerSettlements = Find.WorldObjects.Settlements.Where(x => x.Faction == faction);
-            playerEmpire.AddSettlements(playerSettlements);
+            playerEmpire.AddSettlements(Find.WorldObjects.Settlements.Where(settlement => settlement.Faction == faction));
 
             //Generate a player faction
             if (playerFaction == null)
@@ -115,27 +117,41 @@ namespace Empire_Rewritten.Controllers
             }
         }
 
-        public void CreateNewAIPlayer(Faction faction)
+        public void CreateNewAIPlayer([NotNull] Faction faction)
         {
             AIPlayer aiPlayer = new AIPlayer(faction);
             AIFactions.Add(faction, aiPlayer);
 
-            //Find preexisting settlements.
-            List<Settlement> settlements = Find.WorldObjects.Settlements.Where(x => x.Faction == faction).ToList();
-            if (settlements.Any())
+            // Find preexisting settlements.
+            // Keep first, delete the rest
+            List<Settlement> settlements = Find.WorldObjects.Settlements.Where(settlement => settlement.Faction == faction).ToList();
+            if (settlements.Count == 0)
             {
-                if (settlements[0] is null)
+                Logger.Error("No settlements found for faction " + faction);
+                return;
+            }
+
+            Settlement homeSettlement = settlements[0];
+
+            if (homeSettlement == null)
+            {
+                Logger.Error("No home settlement found for faction " + faction);
+                return;
+            }
+
+            aiPlayer.Empire?.AddSettlement(homeSettlement);
+            if (aiPlayer.Empire == null) Logger.Warn("New AIPlayer has no empire");
+
+            bool first = true;
+            foreach (Settlement settlement in settlements)
+            {
+                if (first)
                 {
-                    Logger.Error(nameof(settlements) + " has null-entry");
+                    first = false;
+                    continue;
                 }
 
-                aiPlayer.Manager.AddSettlement(settlements[0]);
-                settlements.RemoveAt(0);
-
-                foreach (Settlement item in settlements)
-                {
-                    item.Destroy();
-                }
+                settlement?.Destroy();
             }
         }
 
@@ -144,10 +160,13 @@ namespace Empire_Rewritten.Controllers
         /// </summary>
         /// <param name="faction">The <see cref="Faction" /> to modify</param>
         /// <param name="civic">The <see cref="CivicDef" /> to add to <paramref name="faction" /></param>
-        public void AddCivicToFaction(Faction faction, CivicDef civic)
+        public void AddCivicToFaction([NotNull] Faction faction, [NotNull] CivicDef civic)
         {
-            GetOwnedCivicAndEthicData(faction).Civics.Add(civic);
-            NotifyCivicsOrEthicsChanged(GetOwnedSettlementManager(faction));
+            if (GetOwnedCivicAndEthicData(faction) is FactionCivicAndEthicData data)
+            {
+                data.Civics.Add(civic);
+                NotifyCivicsOrEthicsChanged(GetOwnedEmpire(faction));
+            }
         }
 
         /// <summary>
@@ -155,10 +174,13 @@ namespace Empire_Rewritten.Controllers
         /// </summary>
         /// <param name="faction">The <see cref="Faction" /> to modify</param>
         /// <param name="civics">The <see cref="CivicDef">CivicDefs</see> to add to <paramref name="faction" /></param>
-        public void AddCivicsToFaction(Faction faction, IEnumerable<CivicDef> civics)
+        public void AddCivicsToFaction([NotNull] Faction faction, [NotNull] [ItemNotNull] IEnumerable<CivicDef> civics)
         {
-            GetOwnedCivicAndEthicData(faction).Civics.AddRange(civics);
-            NotifyCivicsOrEthicsChanged(GetOwnedSettlementManager(faction));
+            if (GetOwnedCivicAndEthicData(faction) is FactionCivicAndEthicData data)
+            {
+                data.Civics.AddRange(civics);
+                NotifyCivicsOrEthicsChanged(GetOwnedEmpire(faction));
+            }
         }
 
         /// <summary>
@@ -166,10 +188,13 @@ namespace Empire_Rewritten.Controllers
         /// </summary>
         /// <param name="faction">The <see cref="Faction" /> to modify</param>
         /// <param name="ethic">The <see cref="EthicDef" /> to add to <paramref name="faction" /></param>
-        public void AddEthicToFaction(Faction faction, EthicDef ethic)
+        public void AddEthicToFaction([NotNull] Faction faction, [NotNull] EthicDef ethic)
         {
-            GetOwnedCivicAndEthicData(faction).Ethics.Add(ethic);
-            NotifyCivicsOrEthicsChanged(GetOwnedSettlementManager(faction));
+            if (GetOwnedCivicAndEthicData(faction) is FactionCivicAndEthicData data)
+            {
+                data.Ethics.Add(ethic);
+                NotifyCivicsOrEthicsChanged(GetOwnedEmpire(faction));
+            }
         }
 
         /// <summary>
@@ -177,13 +202,16 @@ namespace Empire_Rewritten.Controllers
         /// </summary>
         /// <param name="faction">The <see cref="Faction" /> to modify</param>
         /// <param name="ethics">The <see cref="EthicDef">EthicDefs</see> to add to <paramref name="faction" /></param>
-        public void AddEthicsToFaction(Faction faction, IEnumerable<EthicDef> ethics)
+        public void AddEthicsToFaction([NotNull] Faction faction, [NotNull] [ItemNotNull] IEnumerable<EthicDef> ethics)
         {
-            GetOwnedCivicAndEthicData(faction).Ethics.AddRange(ethics);
-            NotifyCivicsOrEthicsChanged(GetOwnedSettlementManager(faction));
+            if (GetOwnedCivicAndEthicData(faction) is FactionCivicAndEthicData data)
+            {
+                data.Ethics.AddRange(ethics);
+                NotifyCivicsOrEthicsChanged(GetOwnedEmpire(faction));
+            }
         }
 
-        public void NotifyCivicsOrEthicsChanged(Empire settlementManager)
+        public void NotifyCivicsOrEthicsChanged(Empire _)
         {
             throw new NotImplementedException();
         }
@@ -193,9 +221,10 @@ namespace Empire_Rewritten.Controllers
         /// </summary>
         /// <param name="faction">The <see cref="Faction" /> to get the <see cref="FactionCivicAndEthicData" /> of</param>
         /// <returns>The <see cref="FactionCivicAndEthicData" /> linked to <paramref name="faction" /></returns>
-        public FactionCivicAndEthicData GetOwnedCivicAndEthicData(Faction faction)
+        [CanBeNull]
+        public FactionCivicAndEthicData GetOwnedCivicAndEthicData([NotNull] Faction faction)
         {
-            return factionCivicAndEthicDataList.FirstOrFallback(data => data.Faction == faction);
+            return factionCivicAndEthicDataList.FirstOrDefault(data => data.Faction == faction);
         }
     }
 }

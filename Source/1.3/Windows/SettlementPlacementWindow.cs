@@ -1,44 +1,65 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Empire_Rewritten.Controllers;
 using Empire_Rewritten.Resources;
 using Empire_Rewritten.Settlements;
 using Empire_Rewritten.Territories;
 using Empire_Rewritten.Utils;
 using HarmonyLib;
+using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
+using Logger = Empire_Rewritten.Utils.Logger;
 
 namespace Empire_Rewritten.Windows
 {
     public class SettlementPlacementWindow : Window
     {
-        private readonly Dictionary<ResourceDef, ResourceModifier> tileMods = new Dictionary<ResourceDef, ResourceModifier>();
-        private readonly Empire playerEmpire;
-
-        private readonly Rect rectFull = new Rect(0f, 0f, 350f, 650f);
-        private readonly Rect rectMain;
-        private readonly Rect rectTop;
-        private readonly Rect rectMid;
+        [NotNull] private readonly Dictionary<ResourceDef, ResourceModifier> tileMods = new Dictionary<ResourceDef, ResourceModifier>();
+        [NotNull] private readonly Empire playerEmpire;
         private readonly Rect rectBot;
         private readonly Rect rectButtonApply;
+        private readonly Rect rectCostInner;
 
         private readonly Rect rectCostLabel;
         private readonly Rect rectCostOuter;
-        private readonly Rect rectCostInner;
+
+        private readonly Rect rectFull = new Rect(0f, 0f, 350f, 650f);
+        private readonly Rect rectMain;
+        private readonly Rect rectMid;
+        private readonly Rect rectResourceInfoInner;
 
         private readonly Rect rectResourceInfoLabel;
         private readonly Rect rectResourceInfoOuter;
-        private readonly Rect rectResourceInfoInner;
+        private readonly Rect rectTop;
 
         private int selectedWorldTile = -1;
-        private Vector2 resourceScroll;
         private Vector2 costScroll;
+        private Vector2 resourceScroll;
 
         public SettlementPlacementWindow()
         {
-            playerEmpire = UpdateController.CurrentWorldInstance.FactionController.ReadOnlyFactionSettlementData.Find(x => !x.SettlementManager.IsAIPlayer).SettlementManager;
+            if (UpdateController.CurrentWorldInstance == null)
+            {
+                throw new NullReferenceException("UpdateController instance is null");
+            }
+
+            if (UpdateController.CurrentWorldInstance.FactionController == null)
+            {
+                throw new NullReferenceException("UpdateController's FactionController is null");
+            }
+
+            FactionSettlementData playerSettlementData =
+                UpdateController.CurrentWorldInstance.FactionController.ReadOnlyFactionSettlementData.Find(data => data != null && !data.Empire.IsAIPlayer);
+
+            if (playerSettlementData == null)
+            {
+                throw new NullReferenceException("No playerSettlement found");
+            }
+
+            playerEmpire = playerSettlementData.Empire;
 
             doCloseX = true;
             onlyOneOfTypeAllowed = true;
@@ -51,7 +72,7 @@ namespace Empire_Rewritten.Windows
             rectButtonApply = new Rect(rectBot.x, rectBot.y + 5f, rectBot.width, rectBot.height - 10f);
 
             rectResourceInfoLabel = rectMid.TopPartPixels(25f);
-            rectResourceInfoOuter = rectMid.TopPartPixels(29f * 4 /**Default ResourceDef.Count**/).MoveRect(new Vector2(0f, rectResourceInfoLabel.height));
+            rectResourceInfoOuter = rectMid.TopPartPixels(29f * 4 /* Default ResourceDef.Count */).MoveRect(new Vector2(0f, rectResourceInfoLabel.height));
 
             rectResourceInfoInner = rectResourceInfoOuter.GetInnerScrollRect(29f * DefDatabase<ResourceDef>.DefCount);
 
@@ -92,9 +113,13 @@ namespace Empire_Rewritten.Windows
 
             int count = 0;
             Rect rectFull = rectCostInner.TopPartPixels(29f);
-            foreach (KeyValuePair<ThingDef, int> kvp in Empire.SettlementCost)
+            foreach ((ThingDef def, int cost) in Empire.SettlementCost)
             {
-                ThingDef def = kvp.Key;
+                if (def is null)
+                {
+                    Logger.Error($"{nameof(Empire.SettlementCost)} has null {nameof(ThingDef)}");
+                    continue;
+                }
 
                 rectFull.DoRectHighlight(count % 2 == 1);
                 Rect rectIcon = new Rect(rectFull.x + 5f, rectFull.y + 2f, rectFull.height - 4f, rectFull.height - 4f);
@@ -106,7 +131,7 @@ namespace Empire_Rewritten.Windows
                 Widgets.Label(rectLabel, def.LabelCap);
 
                 Text.Anchor = TextAnchor.MiddleRight;
-                Widgets.Label(rectCostLabel, kvp.Value.ToString());
+                Widgets.Label(rectCostLabel, cost.ToString());
                 Text.Anchor = TextAnchor.UpperLeft;
 
                 Widgets.InfoCardButton(rectThingInfo, def);
@@ -131,12 +156,16 @@ namespace Empire_Rewritten.Windows
             Widgets.BeginScrollView(rectResourceInfoOuter, ref resourceScroll, rectResourceInfoInner);
 
             int count = 0;
-            foreach (KeyValuePair<ResourceDef, ResourceModifier> kvp in tileMods)
+            foreach ((ResourceDef def, ResourceModifier modifier) in tileMods)
             {
-                ResourceDef def = kvp.Key;
+                if (def is null)
+                {
+                    Log.Error($"{nameof(tileMods)} has null {nameof(ResourceDef)}");
+                    continue;
+                }
 
                 rectFull.DoRectHighlight(count % 2 == 1);
-                Rect rectIcon = new Rect(rectFull.x + 5f, rectFull.y + 2f, rectFull.height - 4f, rectFull.height - 4f); 
+                Rect rectIcon = new Rect(rectFull.x + 5f, rectFull.y + 2f, rectFull.height - 4f, rectFull.height - 4f);
                 Rect rectLabel = rectFull.MoveRect(new Vector2(rectFull.height + 5f, 0f));
                 Rect rectModLabel = rectFull.LeftPartPixels(rectFull.width - rectFull.height);
                 Rect rectThingInfo = rectFull.RightPartPixels(rectFull.height).ContractedBy(4f);
@@ -145,12 +174,12 @@ namespace Empire_Rewritten.Windows
                 Widgets.Label(rectLabel, def.LabelCap);
 
                 Text.Anchor = TextAnchor.MiddleRight;
-                Widgets.Label(rectModLabel, kvp.Value.multiplier.ToStringPercent());
+                Widgets.Label(rectModLabel, modifier.multiplier.ToStringPercent());
                 Text.Anchor = TextAnchor.UpperLeft;
 
                 if (WindowHelper.InfoCardButtonWorker(rectThingInfo))
                 {
-                    Find.WindowStack.Add(new ResourceInfoWindow(def));
+                    Find.WindowStack?.Add(new ResourceInfoWindow(def));
                 }
 
                 rectFull = rectFull.MoveRect(new Vector2(0f, 29f));
@@ -193,7 +222,7 @@ namespace Empire_Rewritten.Windows
             }
         }
 
-        public bool CanPlaceHere(out List<string> reasons, Empire playerEmpire)
+        public bool CanPlaceHere([NotNull] out List<string> reasons, [NotNull] Empire playerEmpire)
         {
             bool flag = true;
             reasons = new List<string>();
@@ -202,12 +231,12 @@ namespace Empire_Rewritten.Windows
             if (selectedWorldTile > tiles.Count || selectedWorldTile == -1)
             {
                 reasons.Add("Empire_SPW_TileOutOfRange".Translate());
-                return false; //Not just change the flag here because the next line would error
+                // We can't just change the flag here because indexing tiles would error.
+                return false;
             }
 
             Tile tile = tiles[selectedWorldTile];
 
-            Territory territory = TerritoryManager.GetTerritoryManager.GetTerritory(Faction.OfPlayer);
             if (tile.WaterCovered)
             {
                 reasons.Add("Empire_SPW_Water".Translate());
@@ -220,7 +249,13 @@ namespace Empire_Rewritten.Windows
                 flag = false;
             }
 
-            if (!territory.HasTile(selectedWorldTile))
+            Territory territory = TerritoryManager.CurrentInstance?.GetTerritory(Faction.OfPlayer);
+            if (territory == null)
+            {
+                reasons.Add("Empire_SPW_NoTerritory".Translate());
+                flag = false;
+            }
+            else if (!territory.HasTile(selectedWorldTile))
             {
                 reasons.Add("Empire_SPW_TileNotInTerritory".Translate());
                 flag = false;
@@ -233,7 +268,7 @@ namespace Empire_Rewritten.Windows
         {
             if (!CanPlaceHere(out List<string> reasons, playerEmpire))
             {
-                Messages.Message(new Message((reasons.Count == 1) ? reasons[0] : "Empire_SPW_MultipleErrors".TranslateSimple(), MessageTypeDefOf.RejectInput));
+                Messages.Message(new Message(reasons.Count == 1 ? reasons[0] : "Empire_SPW_MultipleErrors".TranslateSimple(), MessageTypeDefOf.RejectInput));
 
                 return;
             }

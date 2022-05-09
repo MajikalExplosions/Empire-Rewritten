@@ -7,7 +7,7 @@ namespace Empire_Rewritten.Resources
     {
         private static void ClearData()
         {
-            DefDatabase<ResourceDef>.AllDefsListForReading.ForEach(def => def.ClearCachedData());
+            DefDatabase<ResourceDef>.AllDefsListForReading.ForEach(def => def?.ClearCachedData());
         }
 
         /// <summary>

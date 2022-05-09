@@ -16,23 +16,22 @@ namespace Empire_Rewritten.Facilities
     [UsedImplicitly(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature | ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
     public class FacilityDef : Def
     {
-        private readonly List<ResourceDef> producedResources = new List<ResourceDef>();
-        public readonly List<string> requiredModIDs = new List<string>();
-
         public readonly bool requiresIdeology;
         public readonly bool requiresRoyalty;
 
-        public List<ThingDefCountClass> costList;
+        [NotNull] [ItemNotNull] public readonly List<ResourceChange> resourceMultipliers = new List<ResourceChange>();
+        [NotNull] [ItemNotNull] public readonly List<ResourceChange> resourceOffsets = new List<ResourceChange>();
+        [NotNull] [ItemNotNull] public readonly List<string> requiredModIDs = new List<string>();
 
-        public Type facilityWorker;
-
-        public GraphicData iconData;
-        public List<ResourceChange> resourceMultipliers = new List<ResourceChange>();
-
-        public List<ResourceChange> resourceOffsets = new List<ResourceChange>();
+        [NotNull] public GraphicData iconData;
+        [NotNull] [ItemNotNull] public List<ThingDefCountClass> costList;
+        [CanBeNull] public Type facilityWorker;
 
         private FacilityWorker worker;
 
+        [ItemNotNull] private List<ResourceDef> producedResources;
+
+        [CanBeNull]
         public FacilityWorker FacilityWorker
         {
             get
@@ -46,21 +45,23 @@ namespace Empire_Rewritten.Facilities
         ///     Maintains a cache of the <see cref="ResourceDef">ResourceDefs</see> that are produced by this
         ///     <see cref="FacilityDef" />
         /// </summary>
+        [NotNull]
+        [ItemNotNull]
         public List<ResourceDef> ProducedResources
         {
             get
             {
-                if (producedResources.NullOrEmpty())
-                {
-                    foreach (ResourceChange change in resourceOffsets)
-                    {
-                        producedResources.Add(change.def);
-                    }
+                if (producedResources != null) return producedResources;
+                producedResources = new List<ResourceDef>();
 
-                    foreach (ResourceChange change in resourceMultipliers)
-                    {
-                        producedResources.Add(change.def);
-                    }
+                foreach (ResourceChange change in resourceOffsets)
+                {
+                    producedResources.Add(change.def);
+                }
+
+                foreach (ResourceChange change in resourceMultipliers)
+                {
+                    producedResources.Add(change.def);
                 }
 
                 return producedResources;
@@ -79,9 +80,12 @@ namespace Empire_Rewritten.Facilities
                 yield return $"{facilityWorker} does not inherit from FacilityWorker!";
             }
 
-            foreach (string str in base.ConfigErrors())
+            if (base.ConfigErrors() is IEnumerable<string> baseErrors)
             {
-                yield return str;
+                foreach (string str in baseErrors)
+                {
+                    yield return str;
+                }
             }
         }
     }

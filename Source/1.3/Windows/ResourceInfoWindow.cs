@@ -38,23 +38,18 @@ namespace Empire_Rewritten.Windows
 
         private static readonly Color TransparentGray = new Color(0f, 0f, 0f, 0.5f);
 
-        private readonly List<ResourceDef> resourceDefs;
-
         private List<FloatMenuOption> cachedOptions;
+        private Rect rectScrollView = new Rect(602f, 2f, 563f, 324f);
+
+        private ResourceDef defSelected;
 
         private Vector2 defDescScrollVector;
 
-        private ResourceDef defSelected;
-        private Rect rectScrollView = new Rect(602f, 2f, 563f, 324f);
-
         private Vector2 scrollRectVector;
 
-        public ResourceInfoWindow()
-        {
-            resourceDefs = DefDatabase<ResourceDef>.AllDefsListForReading;
-        }
+        public ResourceInfoWindow() { }
 
-        public ResourceInfoWindow(ResourceDef defSelected) : base()
+        public ResourceInfoWindow(ResourceDef defSelected)
         {
             this.defSelected = defSelected;
         }
@@ -98,15 +93,28 @@ namespace Empire_Rewritten.Windows
         /// </summary>
         private void DrawCurves()
         {
+            if (defSelected == null) return;
             GUI.BeginGroup(RectCurveContainer);
-            DrawLabeledCurve(RectCurve, defSelected.temperatureCurve, "Empire_ResourceInfoWindowTempCurve".Translate(), "Empire_ResourceInfoWindowTempCurveLabelX".Translate(),
+            DrawLabeledCurve(RectCurve,
+                             defSelected.temperatureCurve,
+                             "Empire_ResourceInfoWindowTempCurve".Translate(),
+                             "Empire_ResourceInfoWindowTempCurveLabelX".Translate(),
                              new FloatRange(-50f, 50f));
-            DrawLabeledCurve(RectCurve.MoveRect(CurveOffset), defSelected.rainfallCurve, "Empire_ResourceInfoWindowRainfallCurve".Translate(),
-                             "Empire_ResourceInfoWindowRainfallCurveLabelX".Translate(), new FloatRange(0f, 7500f));
-            DrawLabeledCurve(RectCurve.MoveRect(CurveOffset * 2), defSelected.heightCurve, "Empire_ResourceInfoWindowHeightCurve".Translate(), "Empire_ResourceInfoWindowHeightCurveLabelX".Translate(),
+            DrawLabeledCurve(RectCurve.MoveRect(CurveOffset),
+                             defSelected.rainfallCurve,
+                             "Empire_ResourceInfoWindowRainfallCurve".Translate(),
+                             "Empire_ResourceInfoWindowRainfallCurveLabelX".Translate(),
+                             new FloatRange(0f, 7500f));
+            DrawLabeledCurve(RectCurve.MoveRect(CurveOffset * 2),
+                             defSelected.heightCurve,
+                             "Empire_ResourceInfoWindowHeightCurve".Translate(),
+                             "Empire_ResourceInfoWindowHeightCurveLabelX".Translate(),
                              new FloatRange(0f, 2500f));
-            DrawLabeledCurve(RectCurve.MoveRect(CurveOffset * 3), defSelected.swampinessCurve, "Empire_ResourceInfoWindowSwampinessCurve".Translate(),
-                             "Empire_ResourceInfoWindowSwampinessCurveLabelX".Translate(), new FloatRange(0f, 1f));
+            DrawLabeledCurve(RectCurve.MoveRect(CurveOffset * 3),
+                             defSelected.swampinessCurve,
+                             "Empire_ResourceInfoWindowSwampinessCurve".Translate(),
+                             "Empire_ResourceInfoWindowSwampinessCurveLabelX".Translate(),
+                             new FloatRange(0f, 1f));
             GUI.EndGroup();
         }
 
@@ -153,7 +161,7 @@ namespace Empire_Rewritten.Windows
                 FixedSection = range,
                 FixedScale = new Vector2(-0.135f, 1.5f),
                 UseFixedSection = true,
-                UseFixedScale = true
+                UseFixedScale = true,
             };
 
             SimpleCurveDrawer.DrawCurve(rect, curve, style);
@@ -173,6 +181,7 @@ namespace Empire_Rewritten.Windows
         /// </summary>
         private void DrawItems()
         {
+            if (defSelected == null) return;
             List<ThingDef> thingDefs = defSelected.ResourcesCreated.AllowedThingDefs.ToList();
 
             Text.Anchor = TextAnchor.MiddleLeft;
@@ -183,9 +192,9 @@ namespace Empire_Rewritten.Windows
 
             for (int i = 0; i < thingDefs.Count; i++)
             {
+                ThingDef current = thingDefs[i];
                 Rect temp = new Rect(RectThingDefContainer);
                 temp.y += temp.height * i;
-                ThingDef current = thingDefs[i];
 
                 GUI.BeginGroup(temp);
 
@@ -200,9 +209,9 @@ namespace Empire_Rewritten.Windows
 
                 MouseoverSounds.DoRegion(RectThingDefsHighlight);
                 Widgets.DrawHighlightIfMouseover(RectThingDefsHighlight);
-                TooltipHandler.TipRegion(RectThingDefsHighlight, current.description);
+                TooltipHandler.TipRegion(RectThingDefsHighlight, current?.description ?? "<null>");
                 Widgets.ThingIcon(RectThingDefIcons, current);
-                Widgets.Label(RectThingDefs, current.LabelCap);
+                Widgets.Label(RectThingDefs, current?.LabelCap ?? "<null>");
                 Widgets.InfoCardButton(RectThingDefs.RightPartPixels(RectThingDefs.height), current);
 
                 GUI.EndGroup();
@@ -218,6 +227,7 @@ namespace Empire_Rewritten.Windows
         /// </summary>
         private void DrawDescriptionAndIcon()
         {
+            if (defSelected == null) return;
             Text.Font = GameFont.Small;
 
             //Def Icon
@@ -275,6 +285,7 @@ namespace Empire_Rewritten.Windows
         /// <param name="valueOffset">offsets the block</param>
         private void DrawResourceValueBlock(bool isOffset, int valueOffset = 0)
         {
+            if (defSelected == null) return;
             for (int i = 0; i < 7; i++)
             {
                 string addOrMultiply = $"Empire_ResourceInfoWindow{(isOffset ? "Additively" : "Multiplicatively")}".TranslateSimple();
@@ -309,7 +320,7 @@ namespace Empire_Rewritten.Windows
         {
             if (WindowHelper.DrawInfoScreenSelectorButton(RectDefSelector, defSelected?.label ?? "Empire_ResourceInfoWindowSelector".Translate()))
             {
-                Find.WindowStack.Add(new FloatMenu(DefOptions));
+                Find.WindowStack?.Add(new FloatMenu(DefOptions));
             }
         }
 
@@ -323,7 +334,7 @@ namespace Empire_Rewritten.Windows
         /// </returns>
         private List<FloatMenuOption> CreateFloatMenuOptions()
         {
-            return FloatMenuOptionCreator.CreateFloatMenuOptions(resourceDefs, def => defSelected = def);
+            return FloatMenuOptionCreator.CreateFloatMenuOptions(DefDatabase<ResourceDef>.AllDefsListForReading, def => defSelected = def);
         }
 
         private void DrawCloseButton(Rect inRect)

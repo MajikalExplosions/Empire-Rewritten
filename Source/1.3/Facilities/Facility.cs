@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Empire_Rewritten.Resources;
+using Empire_Rewritten.Utils;
 using JetBrains.Annotations;
 using RimWorld.Planet;
 using Verse;
@@ -9,29 +10,27 @@ namespace Empire_Rewritten.Facilities
 {
     public class Facility : IExposable, ILoadReferenceable
     {
-        private readonly List<ResourceModifier> modifiers = new List<ResourceModifier>();
-        private int amount;
-        public FacilityDef def;
-        private Settlement settlement;
+        [NotNull] private readonly List<ResourceModifier> modifiers = new List<ResourceModifier>();
+        [NotNull] public FacilityDef def;
         private bool shouldRecalculateModifiers = true;
+        private int amount;
+        [NotNull] private Settlement settlement;
 
-        public Facility(FacilityDef def, Settlement settlement)
+        public Facility([NotNull] FacilityDef def, [NotNull] Settlement settlement)
         {
             this.def = def;
             this.settlement = settlement;
             amount = 1;
-            FacilityWorker = def.FacilityWorker;
         }
 
         [UsedImplicitly]
         public Facility() { }
 
-        public FacilityWorker FacilityWorker { get; }
+        [CanBeNull] public FacilityWorker FacilityWorker => def.FacilityWorker;
 
         public int Amount => amount;
 
-        public int FacilitiesInstalled => amount;
-
+        [NotNull]
         public List<ResourceModifier> ResourceModifiers
         {
             get
@@ -110,10 +109,17 @@ namespace Empire_Rewritten.Facilities
 
             foreach (ResourceDef resourceDef in defs)
             {
+                if (resourceDef == null)
+                {
+                    Logger.Error($"Facility {def.defName} has a null resourceMultiplier {nameof(ResourceDef)}.");
+                    continue;
+                }
+
                 Tile tile = Find.WorldGrid.tiles[settlement.Tile];
                 ResourceModifier modifier = resourceDef.GetTileModifier(tile);
 
-                ResourceChange multiplier = def.resourceMultipliers.FirstOrFallback(r => r.def == resourceDef);
+                ResourceChange multiplier =
+                    def.resourceMultipliers.FirstOrFallback(resourceChange => resourceChange != null && resourceChange.def == resourceDef);
                 if (multiplier is null)
                 {
                     modifier.multiplier *= amount;
@@ -123,8 +129,8 @@ namespace Empire_Rewritten.Facilities
                     modifier.multiplier *= amount * multiplier.amount;
                 }
 
-                ResourceChange offset = def.resourceOffsets.FirstOrFallback(r => r.def == resourceDef);
-                if (!(offset is null))
+                ResourceChange offset = def.resourceOffsets.FirstOrFallback(change => change?.def == resourceDef);
+                if (offset != null)
                 {
                     modifier.offset += amount * offset.amount;
                 }

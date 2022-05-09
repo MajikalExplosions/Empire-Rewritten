@@ -3,6 +3,7 @@ using Empire_Rewritten.HarmonyPatches;
 using Empire_Rewritten.Utils;
 using JetBrains.Annotations;
 using RimWorld;
+using RimWorld.Planet;
 using Verse;
 
 namespace Empire_Rewritten
@@ -45,17 +46,20 @@ namespace Empire_Rewritten
         /// </param>
         private static void AddFactionControllerIfMissing(FactionController _)
         {
-            if (UpdateController.CurrentWorldInstance.HasFactionController) return;
-
-            UpdateController.CurrentWorldInstance.FactionController = new FactionController(FactionSettlementData.CreateFactionSettlementData());
+            if (UpdateController.CurrentWorldInstance != null && UpdateController.CurrentWorldInstance.FactionController == null)
+            {
+                UpdateController.CurrentWorldInstance.FactionController = new FactionController(FactionSettlementData.CreateFactionSettlementData());
+            }
         }
 
         /// <summary>
         ///     Add AI to non-player factions
         /// </summary>
-        private static void AddAIToNonPlayers(FactionController factionController)
+        private static void AddAIToNonPlayers([NotNull] FactionController factionController)
         {
-            foreach (Faction faction in Find.World.factionManager.AllFactions)
+            World world = Find.World;
+            if (world is null) return;
+            foreach (Faction faction in world.factionManager.AllFactions)
             {
                 if (!faction.IsPlayer && !faction.Hidden)
                 {

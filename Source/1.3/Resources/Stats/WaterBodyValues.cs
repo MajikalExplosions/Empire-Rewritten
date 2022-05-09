@@ -1,9 +1,8 @@
-﻿using Empire_Rewritten.Utils;
+﻿using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
-using System;
-using System.Collections.Generic;
 using Verse;
 
 namespace Empire_Rewritten.Resources.Stats
@@ -44,7 +43,7 @@ namespace Empire_Rewritten.Resources.Stats
             }
         }
 
-        public float GetValueMult(Tile tile)
+        public float GetValueMult([NotNull] Tile tile)
         {
             float value = 1;
             List<int> neighbourTiles = new List<int>();
@@ -70,7 +69,7 @@ namespace Empire_Rewritten.Resources.Stats
             return value;
         }
 
-        public float GetValueAdd(Tile tile)
+        public float GetValueAdd([NotNull] Tile tile)
         {
             float value = 0;
             List<int> neighbourTiles = new List<int>();

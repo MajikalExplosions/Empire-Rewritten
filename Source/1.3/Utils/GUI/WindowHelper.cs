@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+using JetBrains.Annotations;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
@@ -62,22 +62,22 @@ namespace Empire_Rewritten.Utils
         }
 
         /// <summary>
-        ///     Draws boxes around all the <paramref name="rects"/> given.
+        ///     Draws boxes around all the <paramref name="rects" /> given.
         /// </summary>
         /// <param name="rects"></param>
-        public static void DrawBoxes(Rect[] rects)
+        public static void DrawBoxes([NotNull] Rect[] rects)
         {
-            for (int i = 0; i < rects.Length; i++)
+            foreach (Rect t in rects)
             {
-                Widgets.DrawBox(rects[i]);
+                Widgets.DrawBox(t);
             }
         }
 
         /// <summary>
-        ///     Draws boxes around all the <paramref name="rects"/> given.
+        ///     Draws boxes around all the <paramref name="rects" /> given.
         /// </summary>
         /// <param name="rects"></param>
-        public static void DrawBoxes(IEnumerable<Rect> rects)
+        public static void DrawBoxes([NotNull] IEnumerable<Rect> rects)
         {
             foreach (Rect rect in rects)
             {
@@ -89,7 +89,7 @@ namespace Empire_Rewritten.Utils
         {
             MouseoverSounds.DoRegion(rect);
             TooltipHandler.TipRegionByKey(rect, "DefInfoTip");
-            bool result = Widgets.ButtonImage(rect, TexButton.Info, GUI.color, true);
+            bool result = Widgets.ButtonImage(rect, TexButton.Info, GUI.color);
             UIHighlighter.HighlightOpportunity(rect, "InfoCard");
             return result;
         }

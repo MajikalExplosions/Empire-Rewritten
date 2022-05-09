@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Empire_Rewritten.Resources.Stats;
 using JetBrains.Annotations;
 using RimWorld;
@@ -8,22 +9,16 @@ using Verse;
 
 namespace Empire_Rewritten.Resources
 {
-    /// <summary>
-    ///     TODO: Document
-    /// </summary>
-    public class BiomeModifier : ResourceMod
-    {
-        public BiomeDef biome;
-    }
-
-    [UsedImplicitly(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature | ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
+    [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
     public class ResourceDef : Def
     {
-        private readonly Dictionary<BiomeDef, ResourceModifier> cachedBiomeModifiers = new Dictionary<BiomeDef, ResourceModifier>();
+        [NotNull] public readonly ThingFilter resourcesCreated = new ThingFilter();
+        [NotNull] private readonly Dictionary<BiomeDef, ResourceModifier> cachedBiomeModifiers = new Dictionary<BiomeDef, ResourceModifier>();
 
-        public List<ThingDef> allowedThingDefs;
+        [NotNull] public GraphicData iconData;
 
-        public List<BiomeModifier> biomeModifiers;
+        [NotNull] public HillinessValues hillinessFactors;
+        [NotNull] public HillinessValues hillinessOffsets;
 
         /// <summary>
         ///     The AI will start trying to get rid of facilities and this resource if it produces more than this number.
@@ -35,28 +30,22 @@ namespace Empire_Rewritten.Resources
         /// </summary>
         public int desiredAIMinimum = 30;
 
+        [ItemNotNull] public List<BiomeModifier> biomeModifiers;
+        [ItemNotNull] public List<StuffCategoryDef> removeStuffCategoryDefs;
+        [ItemNotNull] public List<StuffCategoryDef> stuffCategoryDefs;
+        [ItemNotNull] public List<ThingCategoryDef> removeThingCategoryDefs;
+        [ItemNotNull] public List<ThingCategoryDef> thingCategoryDefs;
+        [ItemNotNull] public List<ThingDef> allowedThingDefs;
+        [ItemNotNull] public List<ThingDef> postRemoveThingDefs;
+        [NotNull] public SimpleCurve heightCurve;
+        [NotNull] public SimpleCurve rainfallCurve;
+        [NotNull] public SimpleCurve swampinessCurve;
+        [NotNull] public SimpleCurve temperatureCurve;
+        [CanBeNull] public Type resourceWorker;
+        [NotNull] public WaterBodyValues waterBodyFactors;
+        [NotNull] public WaterBodyValues waterBodyOffsets;
+
         private bool hasCachedThingDefs;
-        public SimpleCurve heightCurve;
-
-        public HillinessValues hillinessFactors;
-        public HillinessValues hillinessOffsets;
-
-        public GraphicData iconData;
-        public List<ThingDef> postRemoveThingDefs;
-        public SimpleCurve rainfallCurve;
-        public List<StuffCategoryDef> removeStuffCategoryDefs;
-        public List<ThingCategoryDef> removeThingCategoryDefs;
-
-        public ThingFilter resourcesCreated = new ThingFilter();
-        public Type resourceWorker;
-        public List<StuffCategoryDef> stuffCategoryDefs;
-        public SimpleCurve swampinessCurve;
-
-        public SimpleCurve temperatureCurve;
-        public List<ThingCategoryDef> thingCategoryDefs;
-
-        public WaterBodyValues waterBodyFactors;
-        public WaterBodyValues waterBodyOffsets;
 
         private ResourceWorker worker;
 
@@ -66,6 +55,7 @@ namespace Empire_Rewritten.Resources
         ///     Maintains a cached <see cref="ThingFilter" /> of the <see cref="ThingDef">resources</see> created from this
         ///     <see cref="ResourceDef" />
         /// </summary>
+        [NotNull]
         public ThingFilter ResourcesCreated
         {
             get
@@ -94,21 +84,15 @@ namespace Empire_Rewritten.Resources
         /// <summary>
         ///     Maintains a cached <see cref="ResourceWorker" /> of the <see cref="ResourceDef.resourceWorker">specified Type</see>
         /// </summary>
-        public ResourceWorker ResourceWorker
-        {
-            get
-            {
-                if (resourceWorker == null) return null;
-                return worker ?? (worker = (ResourceWorker)Activator.CreateInstance(resourceWorker, resourcesCreated));
-            }
-        }
+        public ResourceWorker ResourceWorker =>
+            resourceWorker == null ? null : worker ?? (worker = (ResourceWorker)Activator.CreateInstance(resourceWorker, resourcesCreated));
 
         /// <summary>
         ///     Gets the <see cref="ResourceModifier" /> of a given <see cref="Tile" />
         /// </summary>
         /// <param name="tile">The <see cref="Tile" /> to get the <see cref="ResourceModifier" /> of</param>
         /// <returns>The <see cref="ResourceModifier" /> for <paramref name="tile" /></returns>
-        public ResourceModifier GetTileModifier(Tile tile)
+        public ResourceModifier GetTileModifier([NotNull] Tile tile)
         {
             ResourceModifier biomeModifier = GetBiomeModifier(tile);
 
@@ -127,7 +111,9 @@ namespace Empire_Rewritten.Resources
             float waterFacVal = waterBodyFactors.GetValueMult(tile);
             float waterOffVal = waterBodyOffsets.GetValueAdd(tile);
 
-            result = result * tempVal * heightVal * biomeModifier.multiplier * swampinessVal * rainfallVal * hillFacVal * waterFacVal + hillOffVal + waterOffVal;
+            result = result * tempVal * heightVal * biomeModifier.multiplier * swampinessVal * rainfallVal * hillFacVal * waterFacVal +
+                     hillOffVal +
+                     waterOffVal;
 
             ResourceModifier modifer = new ResourceModifier(this, biomeModifier.offset, result);
 
@@ -161,7 +147,7 @@ namespace Empire_Rewritten.Resources
         /// <exception cref="ArgumentNullException">
         ///     if <paramref name="tile" />'s <see cref="Tile.biome" /> is <c>null</c>
         /// </exception>
-        public ResourceModifier GetBiomeModifier(Tile tile)
+        public ResourceModifier GetBiomeModifier([NotNull] Tile tile)
         {
             BiomeDef biome = tile.biome;
             if (biome is null)
@@ -169,21 +155,17 @@ namespace Empire_Rewritten.Resources
                 throw new ArgumentNullException(nameof(tile.biome));
             }
 
-            if (cachedBiomeModifiers.ContainsKey(biome)) return cachedBiomeModifiers[biome];
+            if (cachedBiomeModifiers.ContainsKey(biome))
+            {
+                return cachedBiomeModifiers.TryGetValue(biome);
+            }
 
-            if (!biomeModifiers.NullOrEmpty() && biomeModifiers.Any(x => x.biome == biome))
-            {
-                BiomeModifier biomeModifier = biomeModifiers.Find(x => x.biome == biome);
-                ResourceModifier modifier = new ResourceModifier(this, biomeModifier.offset, biomeModifier.multiplier);
-                cachedBiomeModifiers.Add(biome, modifier);
-                return modifier;
-            }
-            else
-            {
-                ResourceModifier modifier = new ResourceModifier(this);
-                cachedBiomeModifiers.Add(biome, modifier);
-                return modifier;
-            }
+            ResourceModifier modifier = biomeModifiers?.First(x => x.biome == biome) is BiomeModifier biomeModifier
+                ? new ResourceModifier(this, biomeModifier.offset, biomeModifier.multiplier)
+                : new ResourceModifier(this);
+
+            cachedBiomeModifiers.Add(biome, modifier);
+            return modifier;
         }
 
         public override void ClearCachedData()
@@ -193,17 +175,47 @@ namespace Empire_Rewritten.Resources
             base.ClearCachedData();
         }
 
+        [NotNull]
         public override IEnumerable<string> ConfigErrors()
         {
+            foreach (string str in base.ConfigErrors() ?? Enumerable.Empty<string>())
+            {
+                yield return str;
+            }
+
             if (resourceWorker != null && !resourceWorker.IsSubclassOf(typeof(ResourceWorker)))
             {
                 yield return $"{resourceWorker} does not inherit from ResourceWorker!";
             }
 
-            foreach (string str in base.ConfigErrors())
+            // ReSharper disable ConditionIsAlwaysTrueOrFalse
+            // ReSharper disable HeuristicUnreachableCode
+            if (hillinessFactors == null)
             {
-                yield return str;
+                yield return $"{nameof(hillinessFactors)} is null!";
             }
+
+            if (hillinessOffsets == null)
+            {
+                yield return $"{nameof(hillinessOffsets)} is null!";
+            }
+
+            if (waterBodyFactors == null)
+            {
+                yield return $"{nameof(waterBodyFactors)} is null!";
+            }
+
+            if (waterBodyOffsets == null)
+            {
+                yield return $"{nameof(waterBodyOffsets)} is null!";
+            }
+
+            if (iconData is null)
+            {
+                yield return "No icon data!";
+            }
+            // ReSharper restore HeuristicUnreachableCode
+            // ReSharper restore ConditionIsAlwaysTrueOrFalse
         }
     }
 }

@@ -1,50 +1,49 @@
 ﻿using System.Threading.Tasks;
 using Empire_Rewritten.Controllers;
 using Empire_Rewritten.Settlements;
+using JetBrains.Annotations;
 using RimWorld;
 
 namespace Empire_Rewritten.AI
 {
     public class AIPlayer : BasePlayer
     {
-        private Empire cachedManager;
-        private bool managerIsDirty = true;
+        private bool cacheIsDirty = true;
+        [CanBeNull] private Empire cachedEmpire;
 
         private int threadTick;
 
         private int tick;
-        private AITileManager tileManager;
 
-        public AIPlayer(Faction faction) : base(faction)
+        public AIPlayer([NotNull] Faction faction) : base(faction)
         {
             ResourceManager = new AIResourceManager(this);
             SettlementManager = new AISettlementManager(this);
             FacilityManager = new AIFacilityManager(this);
+            TileManager = new AITileManager(this);
         }
 
-        public AITileManager TileManager => tileManager ?? (tileManager = new AITileManager(this));
-
-        public Empire Manager
+        [CanBeNull]
+        public Empire Empire
         {
             get
             {
-                if (cachedManager == null || managerIsDirty)
+                if (cachedEmpire == null || cacheIsDirty)
                 {
-                    managerIsDirty = false;
-                    UpdateController updateController = UpdateController.CurrentWorldInstance;
-                    FactionController factionController = updateController.FactionController;
+                    cacheIsDirty = false;
 
-                    cachedManager = factionController.GetOwnedSettlementManager(Faction);
+                    cachedEmpire = UpdateController.CurrentWorldInstance?.FactionController?.GetOwnedEmpire(Faction);
                 }
 
-                return cachedManager;
+                return cachedEmpire;
             }
         }
 
-        public AISettlementManager SettlementManager { get; }
-        public AIFacilityManager FacilityManager { get; }
-        public AIResourceManager ResourceManager { get; }
-        public Faction Faction => faction;
+        [NotNull] public AITileManager TileManager { get; }
+        [NotNull] public AISettlementManager SettlementManager { get; }
+        [NotNull] public AIFacilityManager FacilityManager { get; }
+        [NotNull] public AIResourceManager ResourceManager { get; }
+        [NotNull] public Faction Faction => faction;
 
         public override void MakeMove(FactionController factionController)
         {

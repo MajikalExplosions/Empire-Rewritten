@@ -13,12 +13,11 @@ namespace Empire_Rewritten.Controllers
     [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature)]
     public class UpdateController : WorldComponent
     {
-        private static readonly List<Action<FactionController>> FinalizeInitHooks = new List<Action<FactionController>>();
+        [NotNull] [ItemNotNull] private static readonly List<Action<FactionController>> FinalizeInitHooks = new List<Action<FactionController>>();
 
-        private readonly List<UpdateControllerAction> actions = new List<UpdateControllerAction>();
+        [NotNull] [ItemNotNull] private readonly List<UpdateControllerAction> actions = new List<UpdateControllerAction>();
 
         private FactionController factionController;
-
 
         public UpdateController(World world) : base(world)
         {
@@ -27,18 +26,14 @@ namespace Empire_Rewritten.Controllers
         }
 
         /// <summary>
-        ///     Whether <see cref="UpdateController.factionController" /> is set
-        /// </summary>
-        internal bool HasFactionController => factionController != null;
-
-        /// <summary>
         ///     Sets the <see cref="UpdateController.factionController" />, if it doesn't exist already
         /// </summary>
+        [CanBeNull]
         internal FactionController FactionController
         {
             set
             {
-                if (HasFactionController)
+                if (factionController != null)
                 {
                     Logger.Warn("factionController is already set, skipping assignment");
                     return;
@@ -52,6 +47,7 @@ namespace Empire_Rewritten.Controllers
         /// <summary>
         ///     Static instance of <see cref="UpdateController" />
         /// </summary>
+        [CanBeNull]
         public static UpdateController CurrentWorldInstance { get; private set; }
 
         /// <summary>
@@ -118,14 +114,15 @@ namespace Empire_Rewritten.Controllers
         {
             actions.RemoveAll(action =>
             {
-                action.TryExecute(factionController, out bool shouldDiscard);
+                bool shouldDiscard = false;
+                action?.TryExecute(factionController, out shouldDiscard);
                 return shouldDiscard;
             });
         }
 
         public override void FinalizeInit()
         {
-            FinalizeInitHooks.ForEach(action => action(factionController));
+            FinalizeInitHooks.ForEach(action => action?.Invoke(factionController));
         }
 
         public override void ExposeData()

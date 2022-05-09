@@ -9,25 +9,20 @@ namespace Empire_Rewritten.Territories
 {
     public class Territory : IExposable
     {
-        private Faction faction;
-
-        private List<int> tiles = new List<int>();
+        [NotNull] private Faction faction;
+        [NotNull] private List<int> tiles = new List<int>();
 
         [UsedImplicitly]
         public Territory() { }
 
-        public Territory(Faction faction)
+        public Territory([NotNull] Faction faction)
         {
             this.faction = faction;
         }
 
-        private static WorldGrid WorldGrid => Find.WorldGrid;
+        [NotNull] public Faction Faction => faction;
 
-        private static WorldPathGrid WorldPathGrid => Find.WorldPathGrid;
-
-        public Faction Faction => faction;
-
-        public List<int> Tiles => tiles;
+        [NotNull] public List<int> Tiles => tiles;
 
         public void ExposeData()
         {
@@ -42,7 +37,7 @@ namespace Empire_Rewritten.Territories
 
         public void ClaimTile(int id)
         {
-            if (!TerritoryManager.GetTerritoryManager.AnyFactionOwnsTile(id))
+            if (TerritoryManager.CurrentInstance != null && !TerritoryManager.CurrentInstance.AnyFactionOwnsTile(id))
             {
                 tiles.Add(id);
                 TerritoryDrawer.dirty = true;
@@ -65,10 +60,10 @@ namespace Empire_Rewritten.Territories
             }
         }
 
-        public void SettlementClaimTiles(Settlement settlement)
+        public async void SettlementClaimTiles([NotNull] Settlement settlement)
         {
             // This could cause a race condition where two Empires claim the same Tile
-            Task.Run(() => ClaimTiles(GetSurroundingTiles(settlement.Tile, (int)(faction.def.techLevel + 1))));
+            await Task.Run(() => ClaimTiles(GetSurroundingTiles(settlement.Tile, (int)(faction.def.techLevel + 1))));
         }
 
         /// <summary>
@@ -90,19 +85,18 @@ namespace Empire_Rewritten.Territories
                 return TileAndNeighborsClaimable(centerTileId);
             }
 
-            List<int> result = TileAndNeighborsClaimable(centerTileId);
+            List<int> neighboringTiles = TileAndNeighborsClaimable(centerTileId);
+            List<int> result = new List<int>(neighboringTiles);
 
             int currentDistance = 1;
-            List<int> resultCopy = new List<int>(result);
 
-            foreach (int tile in resultCopy)
+            foreach (int tile in neighboringTiles)
             {
-                Tile worldTile = WorldGrid[tile];
-                if (!worldTile.biome.impassable && worldTile.hilliness != Hilliness.Impassable)
+                if (Find.WorldPathGrid.PassableFast(tile))
                 {
                     foreach (int newTileId in GetSurroundingTiles(tile, distance - currentDistance))
                     {
-                        if (!result.Contains(newTileId) && WorldPathGrid.PassableFast(newTileId))
+                        if (!result.Contains(newTileId) && Find.WorldPathGrid.PassableFast(newTileId))
                         {
                             result.Add(newTileId);
                         }
@@ -115,17 +109,19 @@ namespace Empire_Rewritten.Territories
             return result;
         }
 
+        [NotNull]
         private static List<int> TileAndNeighborsClaimable(int tile)
         {
             List<int> result = TileAndNeighbors(tile);
-            result.RemoveAll(tileID => !WorldPathGrid.PassableFast(tileID));
+            result.RemoveAll(tileID => !Find.WorldPathGrid.PassableFast(tileID));
             return result;
         }
 
+        [NotNull]
         private static List<int> TileAndNeighbors(int tile)
         {
             List<int> result = new List<int>();
-            WorldGrid.GetTileNeighbors(tile, result);
+            Find.WorldGrid.GetTileNeighbors(tile, result);
             result.Add(tile);
             return result;
         }

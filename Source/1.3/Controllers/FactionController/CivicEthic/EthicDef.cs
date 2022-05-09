@@ -11,14 +11,13 @@ namespace Empire_Rewritten.Controllers.CivicEthic
     [UsedImplicitly(ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature | ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
     public class EthicDef : Def
     {
-        public readonly List<Type> abilityWorkers;
-        public readonly List<string> requiredModIDs = new List<string>();
-
         public readonly bool requiresIdeology;
         public readonly bool requiresRoyalty;
+        [NotNull] [ItemNotNull] public readonly List<string> requiredModIDs = new List<string>();
+        [NotNull] [ItemNotNull] public readonly List<Type> abilityWorkers = new List<Type>();
+        public List<EmpireStatModifier> statModifiers;
 
         public Type facilityWorker;
-        public List<EmpireStatModifier> statModifiers;
 
         /// <summary>
         ///     Whether all required mods and DLCs are loaded and active
@@ -33,7 +32,13 @@ namespace Empire_Rewritten.Controllers.CivicEthic
                 yield return $"{type} does not inherit from EthicAbilityWorker!";
             }
 
-            foreach (string str in base.ConfigErrors()) yield return str;
+            if (base.ConfigErrors() is IEnumerable<string> baseErrors)
+            {
+                foreach (string str in baseErrors)
+                {
+                    yield return str;
+                }
+            }
         }
     }
 

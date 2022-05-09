@@ -2,7 +2,7 @@
 using System.Linq;
 using Empire_Rewritten.Facilities;
 using Empire_Rewritten.Settlements;
-using RimWorld;
+using JetBrains.Annotations;
 using RimWorld.Planet;
 using Verse;
 
@@ -12,13 +12,18 @@ namespace Empire_Rewritten.AI
     {
         private Tile tileToBuildOn;
 
-        public AISettlementManager(AIPlayer player) : base(player) { }
+        public AISettlementManager([NotNull] AIPlayer player) : base(player) { }
 
         public bool CanUpgradeOrBuild { get; private set; }
 
-        public bool AttemptToUpgradeSettlement(Settlement settlement)
+        public bool AttemptToUpgradeSettlement([NotNull] Settlement settlement)
         {
-            FacilityManager facilityManager = player.Manager.GetFacilityManager(settlement);
+            FacilityManager facilityManager = player.Empire?.GetFacilityManager(settlement);
+            if (facilityManager == null)
+            {
+                Log.Warning($"{settlement.GetType().Name} has no facility manager");
+                return false;
+            }
 
             return AttemptToUpgradeSettlement(facilityManager);
         }
@@ -36,9 +41,11 @@ namespace Empire_Rewritten.AI
         public void BuildOrUpgradeNewSettlement()
         {
             bool upgradedSettlement = false;
-            if (player.Manager.Settlements.Count > 0)
+            if (player.Empire == null) return;
+            if (player.Empire.Settlements.Count > 0)
             {
-                FacilityManager facilityManager = player.Manager.Settlements.Where(x => !x.Value.IsFullyUpgraded).RandomElement().Value;
+                FacilityManager facilityManager =
+                    player.Empire.Settlements.Values.Where(manager => manager != null && !manager.IsFullyUpgraded).RandomElement();
                 upgradedSettlement = AttemptToUpgradeSettlement(facilityManager);
             }
 
@@ -66,7 +73,7 @@ namespace Empire_Rewritten.AI
         {
             // TODO: Pretty sure this can be improved...
 
-            IEnumerable<int> tileOptions = player.TileManager.GetTiles;
+            IEnumerable<int> tileOptions = player.TileManager.AllTiles;
 
             // Default largestWeight to -1000 so it's almost always initially overridden.
             float largestWeight = -1000;
@@ -82,24 +89,25 @@ namespace Empire_Rewritten.AI
                 }
             }
 
-            tileToBuildOn = Current.Game.World.grid[result];
+            tileToBuildOn = Find.WorldGrid[result];
         }
 
         public bool AttemptToBuildSettlement()
         {
-            if (tileToBuildOn != null && player.Manager.StorageTracker.CanRemoveThingsFromStorage(Empire.SettlementCost))
+            if (tileToBuildOn != null && player.Empire != null && player.Empire.StorageTracker.CanRemoveThingsFromStorage(Empire.SettlementCost))
             {
                 BuildSettlement();
                 return true;
             }
+
             return false;
         }
-       
+
         public void BuildSettlement()
         {
-            if (tileToBuildOn != null)
+            if (tileToBuildOn != null && player.Empire != null)
             {
-                player.Manager.BuildNewSettlementOnTile(tileToBuildOn);
+                player.Empire.BuildNewSettlementOnTile(tileToBuildOn);
                 tileToBuildOn = null;
             }
         }

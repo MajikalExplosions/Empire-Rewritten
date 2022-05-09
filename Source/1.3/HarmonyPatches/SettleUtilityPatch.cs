@@ -1,4 +1,4 @@
-﻿using Empire_Rewritten.Territories;
+﻿using Empire_Rewritten.Controllers;
 using RimWorld;
 using RimWorld.Planet;
 
@@ -6,14 +6,14 @@ namespace Empire_Rewritten.HarmonyPatches
 {
     public static class SettleUtilityPatch
     {
-        public static void Postfix(int tile, Faction faction, Settlement __result)
+        public static void Postfix(Faction faction, Settlement __result)
         {
-            if (faction != Faction.OfPlayer)
+            if (faction != Faction.OfPlayer || __result == null)
             {
                 return;
             }
 
-            TerritoryManager.GetTerritoryManager.GetTerritory(faction).SettlementClaimTiles(__result);
+            UpdateController.CurrentWorldInstance?.FactionController?.GetOwnedEmpire(faction)?.AddSettlement(__result);
         }
     }
 }

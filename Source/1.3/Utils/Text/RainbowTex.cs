@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using JetBrains.Annotations;
 
 namespace Empire_Rewritten.Utils
 {
@@ -25,7 +26,8 @@ namespace Empire_Rewritten.Utils
         ///     The elements of <paramref name="words" /> joined and rainbowified.
         ///     Will not be longer than <paramref name="maxLength" />, but may be missing words at the end.
         /// </returns>
-        public static string Rainbowify(this string[] words, int change = 17, string joiner = " ", int maxLength = 1000)
+        [NotNull]
+        public static string Rainbowify([NotNull] this string[] words, int change = 17, string joiner = " ", int maxLength = 1000)
         {
             if (joiner is null) joiner = string.Empty;
             StringBuilder final = new StringBuilder();
@@ -33,6 +35,11 @@ namespace Empire_Rewritten.Utils
             for (int i = 0; i < words.Length; i++)
             {
                 string word = words[i];
+                if (word == null)
+                {
+                    throw new ArgumentNullException(nameof(words), "One of the words in the array is null.");
+                }
+
                 // If word would overflow maxLength, stop
                 if (final.Length + joiner.Length + word.Length + "<color=#000000></color>".Length > maxLength)
                 {
@@ -68,7 +75,8 @@ namespace Empire_Rewritten.Utils
         ///     A rainbowified version of <paramref name="str" />. Will not be longer than <paramref name="maxLength" />, but
         ///     may be cut off at the end.
         /// </returns>
-        public static string Rainbowify(this string str, char? splitAt = ' ', int change = 17, int maxLength = 1000)
+        [NotNull]
+        public static string Rainbowify([NotNull] this string str, char? splitAt = ' ', int change = 17, int maxLength = 1000)
         {
             return SplitString(str, splitAt).Rainbowify(change, splitAt?.ToString(), maxLength);
         }
@@ -79,7 +87,8 @@ namespace Empire_Rewritten.Utils
         /// <param name="str">The <see cref="string" /> to split</param>
         /// <param name="splitAt">The <see cref="char">char?</see> to split on; If <c>null</c>, splits into 1-character strings</param>
         /// <returns>A <see cref="T:string[]" /> of the split strings</returns>
-        private static string[] SplitString(string str, char? splitAt)
+        [NotNull]
+        private static string[] SplitString([NotNull] string str, char? splitAt)
         {
             return splitAt is char splitAtChar ? str.Split(splitAtChar) : SplitString(str);
         }
@@ -93,7 +102,8 @@ namespace Empire_Rewritten.Utils
         ///     A <see cref="T:string[]" /> with members of length <paramref name="splitSize" />. The last entry may be
         ///     shorter if <paramref name="str" />'s length is not evenly divisible by <paramref name="splitSize" />
         /// </returns>
-        private static string[] SplitString(string str, int splitSize = 1)
+        [NotNull]
+        private static string[] SplitString([NotNull] string str, int splitSize = 1)
         {
             string[] splitArray = new string[str.Length / splitSize + 1];
             splitSize = Math.Max(splitSize, 1);

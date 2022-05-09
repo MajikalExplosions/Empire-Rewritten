@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
+using Logger = Empire_Rewritten.Utils.Logger;
 
 namespace Empire_Rewritten.Territories
 {
@@ -11,7 +13,7 @@ namespace Empire_Rewritten.Territories
     public class TerritoryDrawer : WorldLayer
     {
         public static bool dirty = true;
-        private readonly List<Vector3> vertices = new List<Vector3>();
+        [NotNull] private readonly List<Vector3> vertices = new List<Vector3>();
 
         public override bool ShouldRegenerate => dirty;
 
@@ -30,7 +32,7 @@ namespace Empire_Rewritten.Territories
             yield break;
         }
 
-        private void DrawTile(int tileId, LayerSubMesh subMesh)
+        private void DrawTile(int tileId, [NotNull] LayerSubMesh subMesh)
         {
             Find.WorldGrid.GetTileVertices(tileId, vertices);
             int subMeshVerticesCount = subMesh.verts.Count;
@@ -48,11 +50,14 @@ namespace Empire_Rewritten.Territories
             }
         }
 
-        private void DrawTerritory(Territory territory)
+        private void DrawTerritory([NotNull] Territory territory)
         {
             Color factionColor = territory.Faction.Color;
 
-            Material material = MaterialPool.MatFrom("Territory", ShaderDatabase.WorldOverlayTransparentLit, factionColor, WorldMaterials.WorldObjectRenderQueue);
+            Material material = MaterialPool.MatFrom("Territory",
+                                                     ShaderDatabase.WorldOverlayTransparentLit,
+                                                     factionColor,
+                                                     WorldMaterials.WorldObjectRenderQueue);
             LayerSubMesh layerSubMesh = GetSubMesh(material);
             foreach (int tile in territory.Tiles)
             {
@@ -62,8 +67,14 @@ namespace Empire_Rewritten.Territories
 
         private void DrawAllTerritories()
         {
-            foreach (Territory territory in TerritoryManager.GetTerritoryManager.Territories)
+            foreach (Territory territory in TerritoryManager.CurrentInstance?.Territories ?? Enumerable.Empty<Territory>())
             {
+                if (territory == null)
+                {
+                    Logger.Error("Null territory");
+                    continue;
+                }
+
                 DrawTerritory(territory);
             }
         }
