@@ -112,18 +112,25 @@ namespace Empire_Rewritten.Utils
         }
 
         /// <summary>
-        ///     Changes the <see cref="Rect"/> <paramref name="rect"/>s x and width to the x and width of the <see cref="Rect"/> <paramref name="other"/>
+        ///     Changes the <see cref="Rect" /> <paramref name="rect" />s x and width to the x and width of the <see cref="Rect" />
+        ///     <paramref name="other" />
         /// </summary>
-        /// <param name="rect">The <see cref="Rect"/> to be changed</param>
-        /// <param name="other">The <see cref="Rect"/> that has the variables to change to</param>
+        /// <param name="rect">The <see cref="Rect" /> to be changed</param>
+        /// <param name="other">The <see cref="Rect" /> that has the variables to change to</param>
         /// <returns></returns>
-        public static Rect AlignXWith(this Rect rect, Rect other) => new Rect(other.x, rect.y, other.width, rect.height);
+        public static Rect AlignXWith(this Rect rect, Rect other)
+        {
+            return new Rect(other.x, rect.y, other.width, rect.height);
+        }
 
         /// <summary>
-        ///     Flips a <see cref="Rect"/> <paramref name="rect"/> horizontally
+        ///     Flips a <see cref="Rect" /> <paramref name="rect" /> horizontally
         /// </summary>
         /// <param name="rect">the rect to be flipped</param>
         /// <returns>A flipped rect</returns>
-        public static Rect FlipHorizontal(this Rect rect) => new Rect(rect.x + rect.width, rect.y, rect.width * -1, rect.height);
+        public static Rect FlipHorizontal(this Rect rect)
+        {
+            return new Rect(rect.x + rect.width, rect.y, rect.width * -1, rect.height);
+        }
     }
 }

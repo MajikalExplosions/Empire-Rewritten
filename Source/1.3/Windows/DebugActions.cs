@@ -1,7 +1,6 @@
 ﻿using Empire_Rewritten.Controllers;
 using Empire_Rewritten.Settlements;
 using JetBrains.Annotations;
-using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
@@ -50,16 +49,19 @@ namespace Empire_Rewritten.Windows
         [DebugAction("Empire", "Item transfer window", allowedGameStates = AllowedGameStates.Playing)]
         public static void ItemTransferWindow()
         {
-            Find.WindowStack.Add(new ItemTransferWindow());
+            Find.WindowStack?.Add(new ItemTransferWindow());
         }
 
         [PublicAPI]
         [DebugAction("Empire", "Fill storage with settlement cost", allowedGameStates = AllowedGameStates.Playing)]
         public static void FillStorage()
         {
-            foreach (KeyValuePair<ThingDef, int> kvp in Empire.SettlementCost)
+            foreach ((ThingDef thing, int amount) in Empire.SettlementCost)
             {
-                UpdateController.CurrentWorldInstance.FactionController.ReadOnlyFactionSettlementData.Find(x => !x.SettlementManager.IsAIPlayer).SettlementManager.StorageTracker.AddThingsToStorage(kvp.Key, kvp.Value);
+                if (thing is null) continue;
+                UpdateController.CurrentWorldInstance?.FactionController?.ReadOnlyFactionSettlementData
+                                .Find(settlementData => settlementData != null && !settlementData.Empire.IsAIPlayer)
+                                ?.Empire.StorageTracker.AddThingsToStorage(thing, amount);
             }
         }
     }

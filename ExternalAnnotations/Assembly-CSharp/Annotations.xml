@@ -58,6 +58,14 @@
 		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
 	</member>
 
+	<member name="F:Verse.Map.listerThings">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+	<member name="M:Verse.ListerThings.ThingsMatching(Verse.ThingRequest)">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+		<attribute ctor="M:JetBrains.Annotations.ItemNotNullAttribute.#ctor()" />
+	</member>
+
 	<member name="F:RimWorld.Planet.Tile.biome">
 		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
 	</member>

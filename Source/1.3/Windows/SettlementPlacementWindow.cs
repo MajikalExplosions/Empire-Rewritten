@@ -150,7 +150,7 @@ namespace Empire_Rewritten.Windows
 
         private void DrawResourceInfo()
         {
-            Rect rectFull = rectResourceInfoInner.TopPartPixels(29f);
+            Rect rowRect = rectResourceInfoInner.TopPartPixels(29f);
             Widgets.Label(rectResourceInfoLabel, "Empire_SPW_Modifiers".Translate());
             Widgets.DrawBox(rectResourceInfoOuter);
             Widgets.BeginScrollView(rectResourceInfoOuter, ref resourceScroll, rectResourceInfoInner);
@@ -164,11 +164,11 @@ namespace Empire_Rewritten.Windows
                     continue;
                 }
 
-                rectFull.DoRectHighlight(count % 2 == 1);
-                Rect rectIcon = new Rect(rectFull.x + 5f, rectFull.y + 2f, rectFull.height - 4f, rectFull.height - 4f);
-                Rect rectLabel = rectFull.MoveRect(new Vector2(rectFull.height + 5f, 0f));
-                Rect rectModLabel = rectFull.LeftPartPixels(rectFull.width - rectFull.height);
-                Rect rectThingInfo = rectFull.RightPartPixels(rectFull.height).ContractedBy(4f);
+                rowRect.DoRectHighlight(count % 2 == 1);
+                Rect rectIcon = new Rect(rowRect.x + 5f, rowRect.y + 2f, rowRect.height - 4f, rowRect.height - 4f);
+                Rect rectLabel = rowRect.MoveRect(new Vector2(rowRect.height + 5f, 0f));
+                Rect rectModLabel = rowRect.LeftPartPixels(rowRect.width - rowRect.height);
+                Rect rectThingInfo = rowRect.RightPartPixels(rowRect.height).ContractedBy(4f);
 
                 GUI.DrawTexture(rectIcon, ContentFinder<Texture2D>.Get(def.iconData.texPath));
                 Widgets.Label(rectLabel, def.LabelCap);
@@ -182,7 +182,7 @@ namespace Empire_Rewritten.Windows
                     Find.WindowStack?.Add(new ResourceInfoWindow(def));
                 }
 
-                rectFull = rectFull.MoveRect(new Vector2(0f, 29f));
+                rowRect = rowRect.MoveRect(new Vector2(0f, 29f));
                 count++;
             }
 

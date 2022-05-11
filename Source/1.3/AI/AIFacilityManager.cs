@@ -202,12 +202,7 @@ namespace Empire_Rewritten.AI
                 return false;
             }
 
-            (Settlement settlement, FacilityManager facilityManager) = player.Empire.Settlements.First(kvp => kvp.Value?.HasFacility(facilityDef) ?? false);
-
-            if (settlement != null && facilityManager != null)
-            {
-                facilityManager.RemoveFacility(facilityDef);
-            }
+            player.Empire.Settlements.Values.First(manager => manager?.HasFacility(facilityDef) ?? false).RemoveFacility(facilityDef);
 
             return false;
         }

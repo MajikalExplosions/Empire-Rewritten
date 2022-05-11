@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<assembly name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+	<member name="M:System.Collections.Generic.Dictionary`2.GetEnumerator">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+		<attribute ctor="M:JetBrains.Annotations.ItemNotNullAttribute.#ctor()" />
+	</member>
+	<member name="P:System.Collections.Generic.Dictionary`2.Enumerator.System#Collections#IDictionaryEnumerator#Key">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+	</member>
+	<member name="P:System.Collections.Generic.Dictionary`2.Keys">
+		<attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor()" />
+		<attribute ctor="M:JetBrains.Annotations.ItemNotNullAttribute.#ctor()" />
+	</member>
+</assembly>

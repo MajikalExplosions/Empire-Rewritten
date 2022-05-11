@@ -37,8 +37,7 @@ namespace Empire_Rewritten.Controllers.CivicEthic
         /// <summary>
         ///     Whether all required Mods and DLCs are loaded and active
         /// </summary>
-        public bool RequiredModsLoaded =>
-            ModChecker.RequiredModsLoaded(requiredModIDs, requiresRoyalty, requiresIdeology);
+        public bool RequiredModsLoaded => ModChecker.RequiredModsLoaded(requiredModIDs, requiresRoyalty, requiresIdeology);
 
         public override IEnumerable<string> ConfigErrors()
         {

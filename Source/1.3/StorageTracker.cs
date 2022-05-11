@@ -13,7 +13,7 @@ namespace Empire_Rewritten
 
         public Dictionary<ResourceDef, int> ApproximateResources { get; } = new Dictionary<ResourceDef, int>();
 
-        public Dictionary<ThingDef, int> StoredThings => storedThings;
+        [NotNull] public Dictionary<ThingDef, int> StoredThings => storedThings;
 
         public void ExposeData()
         {
@@ -45,15 +45,15 @@ namespace Empire_Rewritten
         public bool TryRemoveThingsFromStorage([NotNull] Dictionary<ThingDef, int> things)
         {
             bool hasRemovedThings = true;
-            foreach (KeyValuePair<ThingDef, int> kvp in things)
+            foreach ((ThingDef thing, int amount) in things)
             {
-                if (kvp.Key is null)
+                if (thing is null)
                 {
                     Logger.Warn($"Trying to remove null {nameof(ThingDef)} from {nameof(StorageTracker)}");
                     continue;
                 }
 
-                hasRemovedThings &= TryRemoveThingsFromStorage(kvp.Key, kvp.Value);
+                hasRemovedThings &= TryRemoveThingsFromStorage(thing, amount);
             }
 
             return hasRemovedThings;
@@ -87,14 +87,14 @@ namespace Empire_Rewritten
         /// <summary>
         ///     Check if we can remove a set of <see cref="ThingDef" /> from the <see cref="StorageTracker" />.
         /// </summary>
-        /// <param name="thingsAndAmount"></param>
+        /// <param name="thingAmounts"></param>
         /// <returns></returns>
-        public bool CanRemoveThingsFromStorage([NotNull] Dictionary<ThingDef, int> thingsAndAmount)
+        public bool CanRemoveThingsFromStorage([NotNull] Dictionary<ThingDef, int> thingAmounts)
         {
             bool canRemove = true;
-            foreach (KeyValuePair<ThingDef, int> kvp in thingsAndAmount)
+            foreach ((ThingDef thing, int amount) in thingAmounts)
             {
-                canRemove &= CanRemoveThingsFromStorage(kvp.Key, kvp.Value);
+                canRemove &= CanRemoveThingsFromStorage(thing, amount);
             }
 
             return canRemove;
