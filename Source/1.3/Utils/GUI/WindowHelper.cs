@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
+using Empire_Rewritten.Utils;
 
 namespace Empire_Rewritten.Utils
 {
@@ -180,6 +182,44 @@ namespace Empire_Rewritten.Utils
 
             GUI.DrawTexture(topRightCorner, CornerLightHighlight);
             GUI.DrawTexture(bottomLeftCorner, CornerLightHighlight);
+        }
+
+        /// <summary>
+        /// Draws a confirmation dialog at a given location with two labels. If either one is clicked, the corresponding
+        /// <see cref="Action"/> is performed and the function returns true. Otherwise, it returns false.
+        /// </summary>
+        /// <param name="rect">The location to draw the dialog.</param>
+        /// <param name="Question">The prompt for the dialog.</param>
+        /// <param name="OptionLabel0">The text in the first button</param>
+        /// <param name="OptionLabel1">The text in the second button</param>
+        /// <param name="OptionAction0">The action corresponding to pressing the first button</param>
+        /// <param name="OptionAction1">THe aciton corresponding to pressing the second button</param>
+        /// <returns>True if either button is pressed; false otherwise</returns>
+        public static bool ConfirmDialog(Rect rect, String Question, String OptionLabel0, String OptionLabel1, Action OptionAction0, Action OptionAction1)
+        {
+            FlexRect root = new FlexRect("root");
+            root.Top(0.9f, "main");
+            root.BottomLeft(0.5f, 0.125f, "option0");
+            root.BottomRight(0.5f, 0.125f, "option1");
+            Dictionary<string, Rect> rects = root.Resolve(rect);
+
+
+            ResetTextAndColor();
+            Widgets.DrawBox(rects["root"]);
+            Text.Anchor = TextAnchor.MiddleCenter;
+            Widgets.Label(rects["main"], Question);
+            Text.Anchor = TextAnchor.UpperLeft;
+            if (Widgets.ButtonText(rects["option0"].ContractedBy(5f), OptionLabel0))
+            {
+                OptionAction0.Invoke();
+                return true;
+            }
+            if (Widgets.ButtonText(rects["option1"].ContractedBy(5f), OptionLabel1))
+            {
+                OptionAction1.Invoke();
+                return true;
+            }
+            return false;
         }
     }
 }
