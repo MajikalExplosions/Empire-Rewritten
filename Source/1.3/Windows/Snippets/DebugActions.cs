@@ -1,5 +1,6 @@
 ﻿using Empire_Rewritten.Controllers;
 using Empire_Rewritten.Settlements;
+using Empire_Rewritten.Utils;
 using JetBrains.Annotations;
 using System.Collections.Generic;
 using UnityEngine;
@@ -61,6 +62,20 @@ namespace Empire_Rewritten.Windows.Snippets
             {
                 UpdateController.CurrentWorldInstance.FactionController.ReadOnlyFactionSettlementData.Find(x => !x.SettlementManager.IsAIPlayer).SettlementManager.StorageTracker.AddThingsToStorage(kvp.Key, kvp.Value);
             }
+        }
+
+        [PublicAPI]
+        [DebugAction("Empire_FlexRect", "Test flexrect", allowedGameStates = AllowedGameStates.Entry)]
+        public static void TestFlexWindow()
+        {
+            Find.WindowStack.Add(new TestFlexWindow());
+        }
+
+        [PublicAPI]
+        [DebugAction("Empire_FlexRect", "Test flexrect animation", allowedGameStates = AllowedGameStates.Entry)]
+        public static void TestFlexAnimationWindow()
+        {
+            Find.WindowStack.Add(new TestFlexAnimationWindow());
         }
     }
 }
