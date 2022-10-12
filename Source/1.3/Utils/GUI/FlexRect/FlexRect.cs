@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace Empire_Rewritten.Utils.FlexRect
+namespace Empire_Rewritten.Utils
 {
     public class FlexRect
     {
@@ -37,6 +37,20 @@ namespace Empire_Rewritten.Utils.FlexRect
                 if (r != null) return r;
             }
             return null;
+        }
+
+        public bool RemoveChild(string name)
+        {
+            foreach (FlexRect child in Children)
+            {
+                if (child.Name == name)
+                {
+                    Children.Remove(child);
+                    return true;
+                }
+                if (child.RemoveChild(name)) return true;
+            }
+            return false;
         }
 
         public FlexRect Top(float ratio, string name = "")
@@ -193,7 +207,7 @@ namespace Empire_Rewritten.Utils.FlexRect
                 }
 
                 //Minimum size is max of the minimum heights of all children and the max of the min widths of all children
-                MinimumSize = new Vector2(Math.Max(MinimumSize.x, minChildSize.x), Math.Max(MinimumSize.y, minChildSize.y));
+                MinimumSize = new Vector2(Mathf.Max(MinimumSize.x, minChildSize.x), Mathf.Max(MinimumSize.y, minChildSize.y));
             }
             return MinimumSize;
         }
@@ -209,7 +223,10 @@ namespace Empire_Rewritten.Utils.FlexRect
             //  Each child contains information on how it should be placed relative to the parent.
 
             Dictionary<string, Rect> result = new Dictionary<string, Rect>();
-            if (Name.Length != 0) result.Add(Name, rect);
+            if (Name.Length != 0)
+            {
+                result.Add(Name, rect);
+            }
 
             foreach (FlexRect child in Children)
             {
@@ -352,6 +369,14 @@ namespace Empire_Rewritten.Utils.FlexRect
         {
             return AnchorType.ToString() + " | " + VerticalRatio + " " + HorizontalRatio + " " + GridOffsetX + " " + GridOffsetY;
         }
+
+        /*
+        private Rect RoundRect(Rect r)
+        {
+            bool hX = (r.x + r.width) % 1 >= 0.5, hY = (r.y + r.height) % 1 >= 0.5;
+            return new Rect(Mathf.Round(r.x), Mathf.Round(r.y), hX ? (int)r.width : (int)r.width + 1, hY ? (int)r.height : (int)r.height + 1);
+        }
+        */
     }
 
 
