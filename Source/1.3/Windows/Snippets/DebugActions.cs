@@ -77,5 +77,12 @@ namespace Empire_Rewritten.Windows.Snippets
         {
             Find.WindowStack.Add(new TestFlexAnimationWindow());
         }
+
+        [PublicAPI]
+        [DebugAction("Empire_FlexRect", "Flag creation window", allowedGameStates = AllowedGameStates.Entry)]
+        public static void FlagCreationWindow()
+        {
+            Find.WindowStack.Add(new TestEmblemCreationWindow());
+        }
     }
 }
