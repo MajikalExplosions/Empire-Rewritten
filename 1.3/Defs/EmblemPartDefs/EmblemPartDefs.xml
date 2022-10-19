@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<!-- ICONS -->
+	
+	<Empire_Rewritten.Emblems.EmblemPartDef>
+		<defName>icon_empty</defName>
+		<label>Empty</label>
+		<texturePath>Emblems/Icon_Empty</texturePath>
+		<category>Icon</category>
+	</Empire_Rewritten.Emblems.EmblemPartDef>
+
+	<Empire_Rewritten.Emblems.EmblemPartDef>
+		<defName>icon_cross</defName>
+		<label>Cross</label>
+		<texturePath>Emblems/Icon_Cross</texturePath>
+		<category>Icon</category>
+	</Empire_Rewritten.Emblems.EmblemPartDef>
+	
+	<Empire_Rewritten.Emblems.EmblemPartDef>
+		<defName>icon_round</defName>
+		<label>Round</label>
+		<texturePath>Emblems/Icon_Round</texturePath>
+		<category>Icon</category>
+	</Empire_Rewritten.Emblems.EmblemPartDef>
+
+	<Empire_Rewritten.Emblems.EmblemPartDef>
+		<defName>icon_square</defName>
+		<label>Square</label>
+		<texturePath>Emblems/Icon_Square</texturePath>
+		<category>Icon</category>
+	</Empire_Rewritten.Emblems.EmblemPartDef>
+
+	<!-- PATTERNS -->
+	
+	<Empire_Rewritten.Emblems.EmblemPartDef>
+		<defName>pattern_empty</defName>
+		<label>Empty</label>
+		<texturePath>Emblems/Pattern_Empty</texturePath>
+		<category>Pattern</category>
+	</Empire_Rewritten.Emblems.EmblemPartDef>
+
+	<Empire_Rewritten.Emblems.EmblemPartDef>
+		<defName>pattern_cross</defName>
+		<label>Cross</label>
+		<texturePath>Emblems/Pattern_Cross</texturePath>
+		<category>Pattern</category>
+	</Empire_Rewritten.Emblems.EmblemPartDef>
+
+	<Empire_Rewritten.Emblems.EmblemPartDef>
+		<defName>pattern_hstripe2</defName>
+		<label>Horizontal Stripes</label>
+		<texturePath>Emblems/Pattern_HStripe2</texturePath>
+		<category>Pattern</category>
+	</Empire_Rewritten.Emblems.EmblemPartDef>
+
+	<Empire_Rewritten.Emblems.EmblemPartDef>
+		<defName>pattern_vstripe2</defName>
+		<label>Vertical Stripes</label>
+		<texturePath>Emblems/Pattern_VStripe2</texturePath>
+		<category>Pattern</category>
+	</Empire_Rewritten.Emblems.EmblemPartDef>
+	
+	<!-- SHAPES -->
+
+	<Empire_Rewritten.Emblems.EmblemPartDef>
+		<defName>shape_empty</defName>
+		<label>Empty</label>
+		<texturePath>Emblems/Shape_Empty</texturePath>
+		<category>Shape</category>
+	</Empire_Rewritten.Emblems.EmblemPartDef>
+
+	<Empire_Rewritten.Emblems.EmblemPartDef>
+		<defName>shape_round</defName>
+		<label>Round</label>
+		<texturePath>Emblems/Shape_Round</texturePath>
+		<category>Shape</category>
+	</Empire_Rewritten.Emblems.EmblemPartDef>
+
+	<Empire_Rewritten.Emblems.EmblemPartDef>
+		<defName>shape_square</defName>
+		<label>Square</label>
+		<texturePath>Emblems/Shape_Square</texturePath>
+		<category>Shape</category>
+	</Empire_Rewritten.Emblems.EmblemPartDef>
+</Defs>
