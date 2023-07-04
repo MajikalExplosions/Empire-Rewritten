@@ -129,6 +129,12 @@ namespace Empire_Rewritten.Windows
             }
         };
 
+        protected override float Margin => 0f;
+
+        public override Vector2 InitialSize => rectFull.size;
+
+        public static List<SettlementAction> Actions => actions;
+
         public SettlementInfoWindow(Settlement settlement)
         {
             onlyOneOfTypeAllowed = true;
@@ -172,18 +178,9 @@ namespace Empire_Rewritten.Windows
             RecalculateScrollWidgets();
         }
 
-        protected override float Margin => 0f;
-
-        public override Vector2 InitialSize => rectFull.size;
-
-        public static List<SettlementAction> Actions => actions;
-
         public override void DoWindowContents(Rect inRect)
         {
-            if (Widgets.CloseButtonFor(rectMain))
-            {
-                Close();
-            }
+            if (Widgets.CloseButtonFor(rectMain)) Close();
 
             DrawTopPart();
 
@@ -191,14 +188,12 @@ namespace Empire_Rewritten.Windows
 
             DrawBottomLeftParts();
 
-            Widgets.DrawBox(rectMidTopLeft);
-            Widgets.Label(rectMidTopLeft, "rectMidTopLeft");
-            
-            DrawFlag();
+            GUI.color = Color.grey;
+            Widgets.DrawBox(rectMidTopLeft, 2);
+            GUI.color = Color.white;
 
-            Widgets.DrawLightHighlight(rectDesignation);
-            Widgets.DrawBox(rectDesignation);
-            Widgets.Label(rectDesignation, "rectDesignation");
+            DrawFlag();
+            DrawDesignation();
 
             Widgets.DrawLightHighlight(rectExtraInfo);
             Widgets.DrawBox(rectExtraInfo);
@@ -210,6 +205,18 @@ namespace Empire_Rewritten.Windows
             Text.Anchor = TextAnchor.UpperLeft;
 
             DrawBottomPart();
+        }
+
+        private void DrawDesignation()
+        {
+            GUI.color = Color.grey;
+            Widgets.DrawBox(rectDesignation, 2);
+            GUI.color = Color.white;
+            Widgets.DrawLightHighlight(rectDesignation);
+
+            Text.Anchor = TextAnchor.MiddleCenter;
+            Widgets.Label(rectDesignation, $"<b>{facilityManager.Designation}</b>");
+            Text.Anchor = TextAnchor.UpperLeft;
         }
 
         private void DrawFlag()
@@ -276,7 +283,7 @@ namespace Empire_Rewritten.Windows
             rectMidBottomRightInner = rectMidBottomRightOuter.GetInnerScrollRect(height);
             processDisplayRectSize = new Vector2(rectMidBottomRightInner.width, ProcessRectHeight);
 
-            rectProduceSelectionScrollInner = rectProduceSelectionScrollOuter.GetInnerScrollRect((facilityManager.Produce.Count + CommonMargin) * ActionButtonHeight);
+            rectProduceSelectionScrollInner = rectProduceSelectionScrollOuter.GetInnerScrollRect((facilityManager.Produce.Count + 1) * (ActionButtonHeight + CommonMargin));
         }
 
         private void DrawBottomRightPart()
@@ -342,60 +349,72 @@ namespace Empire_Rewritten.Windows
 
             DrawActionButtons();
             DrawFacilitySlots();
+            DrawProduceSection();
+        }
 
+        private void DrawProduceSection()
+        {
             Dictionary<ThingDef, int> tempDic = new Dictionary<ThingDef, int>();
             Rect rectProduceTemp = new Rect(rectProduceSelectionScrollInner.x, rectProduceSelectionScrollInner.y, rectProduceSelectionScrollInner.width, ActionButtonHeight);
             bool removeThings = false;
+            bool amountChanged = false;
 
             Widgets.BeginScrollView(rectProduceSelectionScrollOuter, ref produceScroll, rectProduceSelectionScrollInner);
 
             foreach (ThingDef curThing in facilityManager.Produce.Keys)
             {
-                GUI.color = Color.grey;
-                Widgets.DrawBox(rectProduceTemp);
-                GUI.color = Color.white;
-                
+                DrawButtonBG(rectProduceTemp);
+
                 string buffer = facilityManager.Produce[curThing].ToString();
                 int tempAmount = facilityManager.Produce[curThing];
 
                 Rect rectProduceTempInner = rectProduceTemp.ContractedBy(CommonMargin);
+                Rect tempRectInfoIcon = rectProduceTempInner.RightPartPixels(rectProduceTempInner.height);
                 Rect tempRectThingDefIcon = rectProduceTempInner.LeftPartPixels(rectProduceTempInner.height);
+
                 Rect tempRectThingDefLabel = new Rect(rectProduceTempInner.x + tempRectThingDefIcon.width + CommonMargin, rectProduceTempInner.y, 150f, rectProduceTempInner.height);
-                Rect tempRectThingDefAmount = new Rect(rectProduceTempInner.x + tempRectThingDefIcon.width + tempRectThingDefLabel.width + CommonMargin * 2f, rectProduceTempInner.y, 35f, rectProduceTempInner.height);
-                Rect tempRectThingDefButtonPlus = new Rect(rectProduceTempInner.x + tempRectThingDefIcon.width + tempRectThingDefLabel.width + tempRectThingDefAmount.width + CommonMargin * 3f, rectProduceTempInner.y, 20f, rectProduceTempInner.height);
-                Rect tempRectThingDefButtonMinus = new Rect(rectProduceTempInner.x + tempRectThingDefIcon.width + tempRectThingDefLabel.width + tempRectThingDefAmount.width + tempRectThingDefButtonPlus.width + CommonMargin * 4f, rectProduceTempInner.y, 20f, rectProduceTempInner.height); ;
+                Rect tempRectThingDefAmount = new Rect(tempRectThingDefLabel.xMax + CommonMargin, rectProduceTempInner.y, rectProduceTempInner.width - tempRectThingDefLabel.width - tempRectThingDefIcon.width - tempRectInfoIcon.width - CommonMargin * 2f, rectProduceTempInner.height);
 
                 Widgets.DefIcon(tempRectThingDefIcon, curThing);
                 Widgets.Label(tempRectThingDefLabel, curThing.LabelCap);
                 Widgets.IntEntry(tempRectThingDefAmount, ref tempAmount, ref buffer);
+                Widgets.InfoCardButton(tempRectInfoIcon, curThing);
 
                 tempAmount = Mathf.Clamp(tempAmount, 0, 100); //TODO: Think of maximum
-                removeThings = tempAmount == 0 || removeThings;
+                removeThings |= tempAmount == 0;
+                amountChanged |= facilityManager.Produce[curThing] != tempAmount;
 
                 tempDic.SetOrAdd(curThing, tempAmount);
 
                 rectProduceTemp = rectProduceTemp.MoveRect(new Vector2(0f, ActionButtonHeight + CommonMargin));
             }
 
-            facilityManager.Produce.Clear();
-            facilityManager.Produce.AddRange(tempDic);
-            if (removeThings) facilityManager.Produce.RemoveAll(x => x.Value == 0);
+            if (amountChanged)
+            {
+                facilityManager.Produce.Clear();
+                facilityManager.Produce.AddRange(tempDic);
+                facilityManager.RefreshCachedDesignation();
+            }
 
-            GUI.color = Color.grey;
-            Widgets.DrawBox(rectProduceTemp);
-            GUI.color = Color.white;
+            if (removeThings)
+            {
+                facilityManager.Produce.RemoveAll(x => x.Value == 0);
+                RecalculateScrollWidgets();
+            }
 
             if (Widgets.ButtonInvisible(rectProduceTemp))
             {
                 List<FloatMenuOption> tempOptions = new List<FloatMenuOption>();
                 HashSet<ResourceDef> defsProduced = facilityManager.ProducedResourceDefsReadonly;
                 HashSet<ThingDef> thingsProduced = new HashSet<ThingDef>();
-                
+
                 foreach (ResourceDef resourceDef in defsProduced)
                 {
                     thingsProduced.AddRange(resourceDef.ResourcesCreated.AllowedThingDefs);
                 }
-                
+
+                thingsProduced.RemoveWhere(thingDef => facilityManager.Produce.ContainsKey(thingDef));
+
                 foreach (ThingDef thingDef in thingsProduced)
                 {
                     tempOptions.Add(new FloatMenuOption(thingDef.LabelCap, () => AddProduceToManager(thingDef), thingDef));
@@ -404,6 +423,7 @@ namespace Empire_Rewritten.Windows
                 Find.WindowStack.Add(new FloatMenu(tempOptions));
             }
 
+            DrawButtonBG(rectProduceTemp);
             Widgets.DrawHighlightIfMouseover(rectProduceTemp);
             Text.Anchor = TextAnchor.MiddleCenter;
             Widgets.Label(rectProduceTemp, "<b>Add Produce</b>");
@@ -412,10 +432,19 @@ namespace Empire_Rewritten.Windows
             Widgets.EndScrollView();
         }
 
+        private void DrawButtonBG(Rect rectProduceTemp)
+        {
+            Widgets.DrawBoxSolid(rectProduceTemp, otherGrey);
+            GUI.color = Color.grey;
+            Widgets.DrawBox(rectProduceTemp, 2);
+            GUI.color = Color.white;
+        }
+
         private bool AddProduceToManager(ThingDef thing)
         {
             bool result = facilityManager.Produce.TryAdd(thing, 1);
             RecalculateScrollWidgets();
+            facilityManager.RefreshCachedDesignation();
             return result;
         }
 
@@ -506,7 +535,7 @@ namespace Empire_Rewritten.Windows
                         new FloatMenuOption("Empire_SIW_DeconstructFacility".Translate(currentFacilityDef.LabelCap), () => facilityManager.RemoveFacility(currentFacilityDef)),
                     };
 
-                    options.AddRange(GetFacilityOptions(currentFacilityDef));
+                    //options.AddRange(GetFacilityOptions(currentFacilityDef)); => TODO: Replace building dialog
                     Find.WindowStack.Add(new FloatMenu(options));
                 }
 
