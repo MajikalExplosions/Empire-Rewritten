@@ -1,18 +1,17 @@
-﻿using System;
+﻿using JetBrains.Annotations;
+using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using Verse;
 
 namespace Empire_Rewritten.Events
 {
+
     [UsedImplicitly(ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
     public class EventDef : Def
     {
-        public bool canAffectAI = true;
+        // TODO Complete this class. I have no clue what's going on here.
 
         private EventWorker aiWorker;
-
-        public Type aiEventWorker;
         public Type eventWorker;
 
         public EventWorker EventWorker { get; private set; }
@@ -25,7 +24,7 @@ namespace Empire_Rewritten.Events
             {
                 yield return error;
             }
-
+            /*
             if (eventWorker != typeof(EventWorker) && !eventWorker.IsSubclassOf(typeof(EventWorker)))
             {
                 yield return $"{eventWorker.Name} is not a {nameof(Events.EventWorker)}";
@@ -36,10 +35,12 @@ namespace Empire_Rewritten.Events
             {
                 yield return $"{aiEventWorker.Name} is not a {nameof(Events.EventWorker)}";
             }
+            */
         }
 
         public override void ResolveReferences()
         {
+            /*
             if (eventWorker != typeof(EventWorker) && !eventWorker.IsSubclassOf(typeof(EventWorker)))
             {
                 EventWorker = (EventWorker)Activator.CreateInstance(eventWorker);
@@ -54,6 +55,7 @@ namespace Empire_Rewritten.Events
             }
 
             base.ResolveReferences();
+            */
         }
     }
 }

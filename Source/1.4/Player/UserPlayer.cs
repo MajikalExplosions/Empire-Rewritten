@@ -1,7 +1,4 @@
-﻿using System;
-using Empire_Rewritten.Controllers;
-using Empire_Rewritten.Settlements;
-using RimWorld;
+﻿using RimWorld;
 
 namespace Empire_Rewritten.Player
 {
@@ -10,22 +7,14 @@ namespace Empire_Rewritten.Player
         public UserPlayer(Faction faction) : base(faction) { }
 
 
-        public override void MakeMove(FactionController factionController)
+        public override void MakeMove(EmpireWorldComp worldComp)
         {
-            throw new NotImplementedException();
+            // No moves for player, as they will interact with UI instead.
+            return;
+            //throw new NotImplementedException();
         }
 
-        public override void MakeThreadedMove(FactionController factionController)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override bool ShouldExecute()
-        {
-            return false;
-        }
-
-        public override bool ShouldExecuteThreaded()
+        public override bool IsAI()
         {
             return false;
         }

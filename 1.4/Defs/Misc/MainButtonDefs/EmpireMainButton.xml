@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <MainButtonDef>
+    <defName>Empires</defName>
+    <label>empires</label>
+    <description>See an overview of your empire</description>
+    <tabWindowClass>Empire_Rewritten.UI.EmpireOverviewWindow</tabWindowClass>
+    <order>105</order>
+    <validWithoutMap>true</validWithoutMap>
+    <minimized>True</minimized>
+  </MainButtonDef>
+</Defs>

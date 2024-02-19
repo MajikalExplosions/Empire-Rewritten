@@ -1,10 +1,4 @@
-﻿using Empire_Rewritten.Settlements;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using RimWorld;
 namespace Empire_Rewritten.Events
 {
     public class EventWorker
@@ -17,7 +11,7 @@ namespace Empire_Rewritten.Events
                 return 0f;
             }
         }
-        public virtual void Event(Empire empire)
+        public virtual void Event(Faction faction)
         {
 
         }

@@ -1,5 +1,5 @@
-﻿using System.Linq;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
+using System.Linq;
 using Verse;
 
 namespace Empire_Rewritten.Resources.ResourceWorkers

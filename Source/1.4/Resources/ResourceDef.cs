@@ -1,95 +1,75 @@
-﻿using System;
-using System.Collections.Generic;
-using Empire_Rewritten.Resources.Stats;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
 using Verse;
 
 namespace Empire_Rewritten.Resources
 {
-    /// <summary>
-    ///     TODO: Document
-    /// </summary>
-    public class BiomeModifier : ResourceMod
-    {
-        public BiomeDef biome;
-    }
-
     [UsedImplicitly(ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature | ImplicitUseKindFlags.Assign, ImplicitUseTargetFlags.WithMembers)]
     public class ResourceDef : Def
     {
-        private readonly Dictionary<BiomeDef, ResourceModifier> cachedBiomeModifiers = new Dictionary<BiomeDef, ResourceModifier>();
+        public GraphicData iconData;
+        public Graphic Graphic => iconData.Graphic;
+
+        public Type resourceWorker;
+        private ResourceWorker _worker;
+
+        public bool alwaysShowInList = false;
+
+        // Filters used to create a ThingFilter. These are from least to most specific, and are applied in that order.
+        public List<StuffCategoryDef> allowedStuffCategoryDefs;
+        public List<StuffCategoryDef> disallowedStuffCategoryDefs; // Technically useless (everything is disallowed by default) but kept for consistency
+
+        public List<ThingCategoryDef> allowedThingCategoryDefs;
+        public List<ThingCategoryDef> disallowedThingCategoryDefs;
 
         public List<ThingDef> allowedThingDefs;
+        public List<ThingDef> disallowedThingDefs;
 
-        public List<BiomeModifier> biomeModifiers;
+        private bool _hasThingFilter;
+        private ThingFilter _thingFilter = new ThingFilter();
 
-        /// <summary>
-        ///     The AI will start trying to get rid of facilities and this resource if it produces more than this number.
-        /// </summary>
-        public int desiredAIMaximum = 50;
 
-        /// <summary>
-        ///     The AI will focus more on this resource if its income is below this amount.
-        /// </summary>
-        public int desiredAIMinimum = 30;
-
-        private bool hasCachedThingDefs;
+        // Modifiers from tile stats
         public SimpleCurve heightCurve;
-
-        public HillinessValues hillinessFactors;
-        public HillinessValues hillinessOffsets;
-
-        public GraphicData iconData;
-        public List<ThingDef> postRemoveThingDefs;
         public SimpleCurve rainfallCurve;
-        public List<StuffCategoryDef> removeStuffCategoryDefs;
-        public List<ThingCategoryDef> removeThingCategoryDefs;
-
-        public ThingFilter resourcesCreated = new ThingFilter();
-        public Type resourceWorker;
-        public List<StuffCategoryDef> stuffCategoryDefs;
         public SimpleCurve swampinessCurve;
-
         public SimpleCurve temperatureCurve;
-        public List<ThingCategoryDef> thingCategoryDefs;
 
-        public WaterBodyValues waterBodyFactors;
-        public WaterBodyValues waterBodyOffsets;
+        public TerrainFactors terrainFactors;
+        public RiverFactors riverFactors;
 
-        private ResourceWorker worker;
-
-        public bool isFacilityResource = false;
-
-        public Graphic Graphic => iconData.Graphic;
 
         /// <summary>
         ///     Maintains a cached <see cref="ThingFilter" /> of the <see cref="ThingDef">resources</see> created from this
         ///     <see cref="ResourceDef" />
         /// </summary>
-        public ThingFilter ResourcesCreated
+        public ThingFilter ThingFilter
         {
             get
             {
-                if (hasCachedThingDefs) return resourcesCreated;
+                if (_hasThingFilter) return _thingFilter;
 
-                resourcesCreated.SetDisallowAll();
+                _thingFilter = new ThingFilter();
+                _thingFilter.SetDisallowAll();
 
-                stuffCategoryDefs?.ForEach(category => resourcesCreated.SetAllow(category, true));
-                removeStuffCategoryDefs?.ForEach(category => resourcesCreated.SetAllow(category, false));
+                allowedStuffCategoryDefs?.ForEach(category => _thingFilter.SetAllow(category, true));
+                disallowedStuffCategoryDefs?.ForEach(category => _thingFilter.SetAllow(category, false));
 
-                thingCategoryDefs?.ForEach(category => resourcesCreated.SetAllow(category, true));
-                removeThingCategoryDefs?.ForEach(category => resourcesCreated.SetAllow(category, false));
+                allowedThingCategoryDefs?.ForEach(category => _thingFilter.SetAllow(category, true));
+                disallowedThingCategoryDefs?.ForEach(category => _thingFilter.SetAllow(category, false));
 
-                allowedThingDefs?.ForEach(thingDef => resourcesCreated.SetAllow(thingDef, true));
-                postRemoveThingDefs?.ForEach(thingDef => resourcesCreated.SetAllow(thingDef, false));
+                allowedThingDefs?.ForEach(thingDef => _thingFilter.SetAllow(thingDef, true));
+                disallowedThingDefs?.ForEach(thingDef => _thingFilter.SetAllow(thingDef, false));
 
                 ResourceWorker?.PostModifyThingFilter();
 
-                hasCachedThingDefs = true;
+                _hasThingFilter = true;
 
-                return resourcesCreated;
+                return _thingFilter;
             }
         }
 
@@ -101,9 +81,11 @@ namespace Empire_Rewritten.Resources
             get
             {
                 if (resourceWorker == null) return null;
-                return worker ?? (worker = (ResourceWorker)Activator.CreateInstance(resourceWorker, resourcesCreated));
+                return _worker ?? (_worker = (ResourceWorker)Activator.CreateInstance(resourceWorker, _thingFilter));
             }
         }
+
+        public Texture IconTexture => iconData.texPath.NullOrEmpty() ? null : ContentFinder<Texture2D>.Get(iconData.texPath);
 
         /// <summary>
         ///     Gets the <see cref="ResourceModifier" /> of a given <see cref="Tile" />
@@ -112,87 +94,73 @@ namespace Empire_Rewritten.Resources
         /// <returns>The <see cref="ResourceModifier" /> for <paramref name="tile" /></returns>
         public ResourceModifier GetTileModifier(Tile tile)
         {
-            ResourceModifier biomeModifier = GetBiomeModifier(tile);
+            float heightMult = heightCurve.Evaluate(tile.elevation);
+            float rainMult = rainfallCurve.Evaluate(tile.rainfall);
+            float swampMult = swampinessCurve.Evaluate(tile.swampiness);
+            float tempMult = temperatureCurve.Evaluate(tile.temperature);
 
-            if (tile.WaterCovered || tile.hilliness == Hilliness.Impassable) return new ResourceModifier(this, biomeModifier.offset, 0f);
+            float terrainMult = terrainFactors.GetFactor(_GetTerrainType(tile));
+            float riverMult = riverFactors.GetFactor(_GetRiverType(tile));
 
-            float result = 1;
+            ResourceModifier mod = new ResourceModifier(this, 0, heightMult * rainMult * swampMult * tempMult * terrainMult * riverMult);
 
-            float tempVal = temperatureCurve.Evaluate(tile.temperature);
-            float heightVal = heightCurve.Evaluate((float)tile.hilliness);
-            float swampinessVal = swampinessCurve.Evaluate(tile.swampiness);
-            float rainfallVal = rainfallCurve.Evaluate(tile.rainfall);
-
-            float hillFacVal = hillinessFactors.GetValue((ResourceStat)(tile.hilliness - 1));
-            float hillOffVal = hillinessOffsets.GetValue((ResourceStat)(tile.hilliness - 1));
-
-            float waterFacVal = waterBodyFactors.GetValueMult(tile);
-            float waterOffVal = waterBodyOffsets.GetValueAdd(tile);
-
-            result = result * tempVal * heightVal * biomeModifier.multiplier * swampinessVal * rainfallVal * hillFacVal * waterFacVal + hillOffVal + waterOffVal;
-
-            ResourceModifier modifer = new ResourceModifier(this, biomeModifier.offset, result);
-
-            return modifer;
+            return mod;
         }
 
-        /// <summary>
-        ///     Checks for the <see cref="float">resource production bonus</see> of a given <see cref="ResourceStat" />.
-        ///     Will return offset value if <paramref name="isOffset" /> is true, otherwise the factor value.
-        /// </summary>
-        /// <param name="stat">The <see cref="ResourceStat" /> to get the bonus of</param>
-        /// <param name="isOffset">Whether to get the offset value instead of the factor</param>
-        /// <returns>The value of the given <paramref name="stat" /> and <paramref name="isOffset" /> combination</returns>
-        public float GetBonus(ResourceStat stat, bool isOffset)
+        private TerrainType _GetTerrainType(Tile tile)
         {
-            if (stat.IsWaterBody())
+            TerrainType tt = TerrainType.Impassable;
+            if (tile.hilliness == Hilliness.Flat)
             {
-                return isOffset ? waterBodyOffsets.GetValue(stat) : waterBodyFactors.GetValue(stat);
+                tt = TerrainType.Flat;
             }
-
-            return isOffset ? hillinessOffsets.GetValue(stat) : hillinessFactors.GetValue(stat);
+            else if (tile.hilliness == Hilliness.SmallHills)
+            {
+                tt = TerrainType.SmallHills;
+            }
+            else if (tile.hilliness == Hilliness.LargeHills)
+            {
+                tt = TerrainType.LargeHills;
+            }
+            else if (tile.hilliness == Hilliness.Mountainous)
+            {
+                tt = TerrainType.Mountainous;
+            }
+            else if (tile.hilliness == Hilliness.Impassable)
+            {
+                tt = TerrainType.Impassable;
+            }
+            else if (tile.WaterCovered)
+            {
+                tt = TerrainType.Ocean;
+            }
+            return tt;
         }
 
-        /// <summary>
-        ///     Gets the <see cref="BiomeDef" />-based <see cref="ResourceModifier" /> of a given <see cref="Tile" />
-        /// </summary>
-        /// <param name="tile">The <see cref="Tile" /> to get the <see cref="ResourceModifier" /> of</param>
-        /// <returns>
-        ///     The <see cref="ResourceModifier" /> of the given <see cref="Tile" /> based on its <see cref="Tile.biome" />
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///     if <paramref name="tile" />'s <see cref="Tile.biome" /> is <c>null</c>
-        /// </exception>
-        public ResourceModifier GetBiomeModifier(Tile tile)
+        private RiverType _GetRiverType(Tile tile)
         {
-            BiomeDef biome = tile.biome;
-            if (biome is null)
+            RiverType rt = RiverType.None;
+            RiverDef df = tile.Rivers?.MaxBy<Tile.RiverLink, int>((Func<Tile.RiverLink, int>)(riverlink => riverlink.river.degradeThreshold)).river;
+            if (df == null) return rt;
+            // No DefOf, so we use name
+            if (df.defName == "Creek")
             {
-                throw new ArgumentNullException(nameof(tile.biome));
+                rt = RiverType.Creek;
+            }
+            else if (df.defName == "River")
+            {
+                rt = RiverType.River;
+            }
+            else if (df.defName == "LargeRiver")
+            {
+                rt = RiverType.LargeRiver;
+            }
+            else if (df.defName == "HugeRiver")
+            {
+                rt = RiverType.HugeRiver;
             }
 
-            if (cachedBiomeModifiers.ContainsKey(biome)) return cachedBiomeModifiers[biome];
-
-            if (!biomeModifiers.NullOrEmpty() && biomeModifiers.Any(x => x.biome == biome))
-            {
-                BiomeModifier biomeModifier = biomeModifiers.Find(x => x.biome == biome);
-                ResourceModifier modifier = new ResourceModifier(this, biomeModifier.offset, biomeModifier.multiplier);
-                cachedBiomeModifiers.Add(biome, modifier);
-                return modifier;
-            }
-            else
-            {
-                ResourceModifier modifier = new ResourceModifier(this);
-                cachedBiomeModifiers.Add(biome, modifier);
-                return modifier;
-            }
-        }
-
-        public override void ClearCachedData()
-        {
-            cachedBiomeModifiers.Clear();
-            hasCachedThingDefs = false;
-            base.ClearCachedData();
+            return rt;
         }
 
         public override IEnumerable<string> ConfigErrors()

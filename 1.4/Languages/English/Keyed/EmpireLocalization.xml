@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+	<Empire_OV_CustomizationTab>Customization</Empire_OV_CustomizationTab>
+	<Empire_OV_SettlementTab>Settlements</Empire_OV_SettlementTab>
+	<Empire_OV_StockpileTab>Stockpiles</Empire_OV_StockpileTab>
+	
+	<Empire_OV_CreateEmpire>Declare Founding</Empire_OV_CreateEmpire>
+
+	<Empire_OV_SettlementTableName>Settlement Name</Empire_OV_SettlementTableName>
+	<Empire_OV_SettlementTableLevel>Level</Empire_OV_SettlementTableLevel>
+	<Empire_OV_SettlementTableFacilities>Facilities</Empire_OV_SettlementTableFacilities>
+	<Empire_OV_CreateSettlement>New Settlement</Empire_OV_CreateSettlement>
+
+	<Empire_OV_StockpileTableResource>Resource</Empire_OV_StockpileTableResource>
+	<Empire_OV_StockpileTableAmount>Current Stock</Empire_OV_StockpileTableAmount>
+	<Empire_OV_StockpileTableChange>Daily Change</Empire_OV_StockpileTableChange>
+	<Empire_OV_StockpileTableAddButton>Give Resource</Empire_OV_StockpileTableAddButton>
+	<Empire_OV_StockpileTableNoTrader>No healthy trader</Empire_OV_StockpileTableNoTrader>
+	<Empire_OV_StockpileTableTaxButton>Modify Tax</Empire_OV_StockpileTableTaxButton>
+
+	<Empire_SP_Header>New Settlement</Empire_SP_Header>
+	<Empire_SP_NoTileSelected>No tile selected</Empire_SP_NoTileSelected>
+	<Empire_SP_Settle>Settle tile</Empire_SP_Settle>
+	<Empire_SP_ModifierHeader>Tile Modifiers</Empire_SP_ModifierHeader>
+	<Empire_SP_CostHeader>Placement Cost</Empire_SP_CostHeader>
+
+	<Empire_SM_ViewDetail>Settlement Details</Empire_SM_ViewDetail>
+	<Empire_SM_ViewDetailDesc>View Settlement Details</Empire_SM_ViewDetailDesc>
+	<Empire_SM_ErrBuildOnWater>Can't settle on water</Empire_SM_ErrBuildOnWater>
+	<Empire_SM_ErrBuildOnImpassable>Can't settle on impassable tile</Empire_SM_ErrBuildOnImpassable>
+	<Empire_SM_ErrBuildTooClose>Too close to existing settlement</Empire_SM_ErrBuildTooClose>
+	<Empire_SM_ErrBuildTileUnowned>Tile is not your territory</Empire_SM_ErrBuildTileUnowned>
+	<Empire_SM_ErrBuildNotEnoughResources>Not enough resources</Empire_SM_ErrBuildNotEnoughResources>
+	
+	<Empire_RT_AddHeader>Give Resources</Empire_RT_AddHeader>
+	<Empire_RT_TaxHeader>Modify Tax</Empire_RT_TaxHeader>
+	<Empire_RT_Add>Add Thing</Empire_RT_Add>
+	<Empire_RT_Reset>Reset</Empire_RT_Reset>
+	<Empire_RT_NothingSelected>No Things selected</Empire_RT_NothingSelected>
+	<Empire_RT_Cancel>Cancel</Empire_RT_Cancel>
+	<Empire_RT_Accept>Confirm</Empire_RT_Accept>
+	<Empire_RT_TooExpensive>Things too expensive</Empire_RT_TooExpensive>
+
+</LanguageData>

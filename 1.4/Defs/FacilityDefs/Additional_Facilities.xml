@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<Empire_Rewritten.Settlements.FacilityDef ParentName="Empire_FacilityBase">
+		<defName>Empire_Fac_Sweatshop</defName>
+		<label>Apparel Sweatshop</label>
+
+		<iconData>
+			<texPath>Facilities/ApparelSweatshop</texPath>
+		</iconData>
+		
+		<requiredResearch>ComplexClothing</requiredResearch>
+
+		<production>
+			<li>
+				<def>Empire_Res_Apparel</def>
+				<offset>50</offset>
+				<multiplier>1</multiplier>
+			</li>
+		</production>
+
+		<upkeep>
+			<li>
+				<def>Empire_Res_Food</def>
+				<offset>25</offset>
+				<multiplier>1</multiplier>
+			</li>
+			<li>
+				<def>Empire_Res_Textiles</def>
+				<offset>25</offset>
+				<multiplier>1</multiplier>
+			</li>
+		</upkeep>
+
+		<buildCost>
+			<li>
+				<resource>Empire_Res_Stone</resource>
+				<amount>200</amount>
+			</li>
+			<li>
+				<resource>Empire_Res_Metal</resource>
+				<amount>100</amount>
+			</li>
+		</buildCost>
+	</Empire_Rewritten.Settlements.FacilityDef>
+
+
+	<Empire_Rewritten.Settlements.FacilityDef ParentName="Empire_FacilityBase">
+		<defName>Empire_Fac_Manufactory</defName>
+		<label>Component Manufactory</label>
+
+		<iconData>
+			<texPath>Facilities/BionicsManufacturingPlant</texPath>
+		</iconData>
+
+		<requiredResearch>Fabrication</requiredResearch>
+
+		<production>
+			<li>
+				<def>Empire_Res_Components</def>
+				<offset>50</offset>
+				<multiplier>1</multiplier>
+			</li>
+		</production>
+
+		<upkeep>
+			<li>
+				<def>Empire_Res_Food</def>
+				<offset>25</offset>
+				<multiplier>1</multiplier>
+			</li>
+			<li>
+				<def>Empire_Res_Metal</def>
+				<offset>25</offset>
+				<multiplier>1</multiplier>
+			</li>
+		</upkeep>
+
+		<buildCost>
+			<li>
+				<resource>Empire_Res_Stone</resource>
+				<amount>200</amount>
+			</li>
+			<li>
+				<resource>Empire_Res_Components</resource>
+				<amount>100</amount>
+			</li>
+		</buildCost>
+	</Empire_Rewritten.Settlements.FacilityDef>
+
+	
+	<Empire_Rewritten.Settlements.FacilityDef ParentName="Empire_FacilityBase">
+		<defName>Empire_Fac_DrugLab</defName>
+		<label>Basic Drug Lab</label>
+
+		<iconData>
+			<texPath>Facilities/GlitterworldResearchFacility</texPath>
+		</iconData>
+
+		<requiredResearch>DrugProduction</requiredResearch>
+
+		<production>
+			<li>
+				<def>Empire_Res_Drugs</def>
+				<offset>100</offset>
+				<multiplier>1</multiplier>
+			</li>
+		</production>
+
+		<upkeep>
+			<li>
+				<def>Empire_Res_Food</def>
+				<offset>50</offset>
+				<multiplier>1</multiplier>
+			</li>
+			<li>
+				<def>Empire_Res_Textiles</def>
+				<offset>10</offset>
+				<multiplier>1</multiplier>
+			</li>
+		</upkeep>
+
+		<buildCost>
+			<li>
+				<resource>Empire_Res_Stone</resource>
+				<amount>200</amount>
+			</li>
+			<li>
+				<resource>Empire_Res_Metal</resource>
+				<amount>100</amount>
+			</li>
+			<li>
+				<resource>Empire_Res_Components</resource>
+				<amount>100</amount>
+			</li>
+		</buildCost>
+	</Empire_Rewritten.Settlements.FacilityDef>
+</Defs>

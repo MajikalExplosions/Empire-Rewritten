@@ -1,7 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Empire_Rewritten.HarmonyPatches;
 using JetBrains.Annotations;
 using RimWorld.Planet;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
@@ -15,7 +16,7 @@ namespace Empire_Rewritten.Territories
 
         public override bool ShouldRegenerate => dirty;
 
-        protected override float Alpha => TerritoryUtils.TerritoryAlpha;
+        protected override float Alpha => PlaySettingsPatch.ShowTerritories ? 0.8f : 0;
 
         public override IEnumerable Regenerate()
         {
@@ -48,23 +49,24 @@ namespace Empire_Rewritten.Territories
             }
         }
 
-        private void DrawTerritory(Territory territory)
+        private void DrawTerritory(Settlement settlement)
         {
-            Color factionColor = territory.Faction.Color;
+            Color factionColor = settlement.Faction.Color;
 
             Material material = MaterialPool.MatFrom("Territory", ShaderDatabase.WorldOverlayTransparentLit, factionColor, WorldMaterials.WorldObjectRenderQueue);
             LayerSubMesh layerSubMesh = GetSubMesh(material);
-            foreach (int tile in territory.Tiles)
+
+            foreach (int tileId in settlement.GetTerritory())
             {
-                DrawTile(tile, layerSubMesh);
+                DrawTile(tileId, layerSubMesh);
             }
         }
 
         private void DrawAllTerritories()
         {
-            foreach (Territory territory in TerritoryManager.GetTerritoryManager.Territories)
+            foreach (Settlement settlement in EmpireWorldComp.Current.GetTrackedSettlements())
             {
-                DrawTerritory(territory);
+                DrawTerritory(settlement);
             }
         }
     }

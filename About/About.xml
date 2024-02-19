@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-	<name>Empire Rewritten</name>
-	<author>Danimineiro, NesiAvali, Imperitor, Saakra</author>
-	<packageId>Dani.Empire</packageId>
+	<name>Empire Rewritten - Dev Build</name>
+	<author>MajikalExplosions, Danimineiro, NesiAvali, and Toby222</author>
+	<packageId>MajikalExplosions.Empire</packageId>
 	<url>https://discord.gg/f3zFQqA</url>
 	<supportedVersions>
 		<li>1.4</li>
@@ -18,17 +18,13 @@
 		</li>
 	</modDependencies>
 	
-	<description>Spread your rule across the Rimworld with self governing colonies that are loyal to you and you alone. Command them to fight in your name, and destroy your enemies. But politics is always a deadly game.
+	<description>Unstable in-development build of Empire Rewritten. Intended for testing only; do not distribute.
+		
+Spread your rule across the Rimworld with self governing colonies that are loyal to you and you alone. Command them to fight in your name, and destroy your enemies. But politics is always a deadly game.
 
 Events will periodically influence your colonies, or your faction as a whole. You must decide how best to respond to these situations. And beware, a poor guiding hand will have consequences, your faction may lose faith in your leadership entirely, and take their destiny into their own hands.
 
 Your colonists will pay taxes, be it in silver, or goods. You can tell them where you want your taxes, and they will dutifully pay them. A fully customizable faction name and title allows you to put your own spin on your subjects. They can be feudal vassals, a megacorporation’s branch offices, or even a shining beacon of truth and liberty. It is all part of the greater story.
-	
-	WIKI - https://rimworld-empire-mod.fandom.com/wiki/Rimworld-_Empire_Mod_Wiki
 
-	DISCORD - https://discord.gg/f3zFQqA
-
-	PATREON - https://www.patreon.com/Saakra
-
-	YOUTUBE - https://youtu.be/lvWb1rMMsq8</description>
+DISCORD - https://discord.gg/f3zFQqA</description>
 </ModMetaData>

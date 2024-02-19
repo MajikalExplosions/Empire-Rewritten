@@ -1,0 +1,216 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<Empire_Rewritten.Settlements.FacilityDef Name="Empire_FacilityBase" Abstract="True">
+		<description>No facility description provided.</description>
+		
+		<iconData>
+			<texPath>Error/Missing</texPath>
+		</iconData>
+		
+		<buildDuration>600</buildDuration> <!-- This is in game ticks (60000 = 1 day)-->
+	</Empire_Rewritten.Settlements.FacilityDef>
+
+	
+	<Empire_Rewritten.Settlements.FacilityDef ParentName="Empire_FacilityBase">
+		<defName>Empire_Fac_GatheringHut</defName>
+		<label>Gathering Hut</label>
+
+		<production>
+			<li>
+				<def>Empire_Res_Food</def>
+				<offset>5</offset>
+				<multiplier>1</multiplier>
+			</li>
+			<li>
+				<def>Empire_Res_Wood</def>
+				<offset>10</offset>
+				<multiplier>1</multiplier>
+			</li>
+			<li>
+				<def>Empire_Res_Stone</def>
+				<offset>10</offset>
+				<multiplier>1</multiplier>
+			</li>
+		</production>
+
+		<upkeep></upkeep>
+
+		<buildCost>
+			<li>
+				<resource>Empire_Res_Wood</resource>
+				<amount>60</amount>
+			</li>
+			<li>
+				<resource>Empire_Res_Stone</resource>
+				<amount>60</amount>
+			</li>
+		</buildCost>
+		
+		<buildDuration>30000</buildDuration>
+	</Empire_Rewritten.Settlements.FacilityDef>
+
+
+	<Empire_Rewritten.Settlements.FacilityDef ParentName="Empire_FacilityBase">
+		<defName>Empire_Fac_Pasture</defName>
+		<label>Pasture</label>
+
+		<production>
+			<li>
+				<def>Empire_Res_Food</def>
+				<offset>25</offset>
+				<multiplier>1</multiplier>
+			</li>
+			<li>
+				<def>Empire_Res_Textiles</def>
+				<offset>25</offset>
+				<multiplier>1</multiplier>
+			</li>
+		</production>
+
+		<upkeep>
+		</upkeep>
+
+		<buildCost>
+			<li>
+				<resource>Empire_Res_Wood</resource>
+				<amount>200</amount>
+			</li>
+			<li>
+				<resource>Empire_Res_Stone</resource>
+				<amount>100</amount>
+			</li>
+		</buildCost>
+	</Empire_Rewritten.Settlements.FacilityDef>
+	
+	
+	<Empire_Rewritten.Settlements.FacilityDef ParentName="Empire_FacilityBase">
+		<defName>Empire_Fac_Farm</defName>
+		<label>Farm</label>
+
+		<requiredResearch>Smithing</requiredResearch>
+
+		<production>
+			<li>
+				<def>Empire_Res_Food</def>
+				<offset>50</offset>
+				<multiplier>1</multiplier>
+			</li>
+		</production>
+
+		<upkeep>
+		</upkeep>
+
+		<buildCost>
+			<li>
+				<resource>Empire_Res_Wood</resource>
+				<amount>200</amount>
+			</li>
+			<li>
+				<resource>Empire_Res_Stone</resource>
+				<amount>100</amount>
+			</li>
+		</buildCost>
+	</Empire_Rewritten.Settlements.FacilityDef>
+	
+	<Empire_Rewritten.Settlements.FacilityDef ParentName="Empire_FacilityBase">
+		<defName>Empire_Fac_Lumberhut</defName>
+		<label>Lumberhut</label>
+
+		<requiredResearch>TreeSowing</requiredResearch>
+
+		<production>
+			<li>
+				<def>Empire_Res_Wood</def>
+				<offset>50</offset>
+				<multiplier>1</multiplier>
+			</li>
+		</production>
+		
+		<upkeep>
+			<li>
+				<def>Empire_Res_Food</def>
+				<offset>25</offset>
+				<multiplier>1</multiplier>
+			</li>
+		</upkeep>
+
+		<buildCost>
+			<li>
+				<resource>Empire_Res_Wood</resource>
+				<amount>200</amount>
+			</li>
+			<li>
+				<resource>Empire_Res_Stone</resource>
+				<amount>100</amount>
+			</li>
+		</buildCost>
+	</Empire_Rewritten.Settlements.FacilityDef>
+
+	<Empire_Rewritten.Settlements.FacilityDef ParentName="Empire_FacilityBase">
+		<defName>Empire_Fac_Quarry</defName>
+		<label>Quarry</label>
+
+		<requiredResearch>Stonecutting</requiredResearch>
+
+		<production>
+			<li>
+				<def>Empire_Res_Stone</def>
+				<offset>50</offset>
+				<multiplier>1</multiplier>
+			</li>
+		</production>
+
+		<upkeep>
+			<li>
+				<def>Empire_Res_Food</def>
+				<offset>25</offset>
+				<multiplier>1</multiplier>
+			</li>
+		</upkeep>
+
+		<buildCost>
+			<li>
+				<resource>Empire_Res_Wood</resource>
+				<amount>200</amount>
+			</li>
+			<li>
+				<resource>Empire_Res_Stone</resource>
+				<amount>100</amount>
+			</li>
+		</buildCost>
+	</Empire_Rewritten.Settlements.FacilityDef>
+
+	<Empire_Rewritten.Settlements.FacilityDef ParentName="Empire_FacilityBase">
+		<defName>Empire_Fac_Mine</defName>
+		<label>Simple Mine</label>
+
+		<requiredResearch>Smithing</requiredResearch>
+
+		<production>
+			<li>
+				<def>Empire_Res_Metal</def>
+				<offset>50</offset>
+				<multiplier>1</multiplier>
+			</li>
+		</production>
+
+		<upkeep>
+			<li>
+				<def>Empire_Res_Food</def>
+				<offset>25</offset>
+				<multiplier>1</multiplier>
+			</li>
+		</upkeep>
+
+		<buildCost>
+			<li>
+				<resource>Empire_Res_Wood</resource>
+				<amount>200</amount>
+			</li>
+			<li>
+				<resource>Empire_Res_Stone</resource>
+				<amount>100</amount>
+			</li>
+		</buildCost>
+	</Empire_Rewritten.Settlements.FacilityDef>
+</Defs>

@@ -11,9 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Source\1.4\Documentation\.obsidian\**" />
-    <EmbeddedResource Remove="Source\1.4\Documentation\.obsidian\**" />
-    <None Remove="Source\1.4\Documentation\.obsidian\**" />
+    <Compile Remove="1.4\Patches\**" />
+    <EmbeddedResource Remove="1.4\Patches\**" />
+    <None Remove="1.4\Patches\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,7 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="1.4\Patches\" />
     <Folder Include="About\" />
   </ItemGroup>
 

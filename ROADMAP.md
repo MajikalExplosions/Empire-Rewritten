@@ -1,0 +1,100 @@
+
+## Empire Rewritten Design Document/Roadmap
+
+### Remaining Tasks
+- Tick logic (update resources, etc.) [DONE]
+- Loading/Saving
+	- Finish ExposeData [DONE]
+	- Make sure that loading doesn't conflict with FinalizeInit [DONE?]
+- Separate filler faction for player? (seems like it may work without?) [DONE?]
+- Remove base game prompt for settlement name [DONE?; we name faction/settlement, which disables the prompt]
+- Implement cancelling constructions/upgrades [DONE]
+- UI
+	- Main Empire Overview (see "Research" tab for inspiration)
+	    - Tab: Creation [DONE]
+		- Tab: Overview/Customization [DONE]
+		- Tab: Settlements [DONE]
+		- Tab: Stockpile [DONE]
+		- Tab: Military [FUTURE]
+		- Tab: Diplomacy [FUTURE]
+		- Tab: Events [FUTURE]
+	- Settlement Details (see old code) [DONE?]
+	- Settlement Placement (see old code) [DONE?]
+	- Rename Settlements
+	- Transfer resources to faction [DONE]
+- When map removed, 
+- Player tax delivery to map [DONE]
+- Non-placeholder assets		
+	- XML defs (resources, facilities) [DONE]
+	- Textures & icons [DONE]
+- Localization [DONE?] (might have missed a few keys)
+- Basic Wiki?
+- Documentation
+
+### Project Organization
+- `Root`
+	- Initalization
+	- Global data containers
+- `DefOf`
+	- Faster def access
+- `Processes`
+	- Timed events/happenings (e.g. construction, deliveries)
+- `Events`
+	- Firing random events (e.g. flavor)
+- `Emblems`
+	- Emblems for factions
+- `Facilities`
+	- Facility logic and implementation
+- `HarmonyPatches`
+	- Patches to base RW behavior
+- `Player`
+	- `AI`
+		- Faction AI implementation
+	- Base classes for player logic handling (used by AI and player)
+	- Player faction implementation
+- `Resources`
+	- Manage resource types and production value info
+- `Settlements`
+	- Manage settlement logic
+- `Territories`
+	- Manage territories
+- `Utils`
+	- Shared utility functions
+- `Windows`
+	- GUI implementation
+### Initial Release Goals
+- Functional settlements
+	- Resource production
+	- Buildable facilities
+	- Drawn territories
+- Simple faction management
+	- Settlement construction
+	- Resource deliveries
+- Customization
+	- Custom emblems for player, procedural for faction
+- AI		
+	- Basic expansion
+	- Basic resource management
+
+### Eventual Goals
+- Better UI
+	- Better selection menus for facilities
+	- "Give resources" button in overview stockpile tax
+- Diplomacy
+	- Conflicts
+	- Faction Relations
+- Customization
+	- Faction civics/ethics
+	- Custom emblems & UI
+	- Tax window (maybe button in overview): Tax rate (by ResourceDef) and delivery. Also, customize what is delivered (also by resource def; like tithe, but with trade menu). See Tradeable.cs
+- Events
+- Military
+	- Callable soldiers (see Discord message)
+	- Each faction has a global military budget pool. Combat losses (wealth or pawns) are deducted from this pool.
+	- The soldiers are stationed in settlements, which is where they're deployed. Pawn losses also impact settlement happiness/loyalty.
+- Extensibility
+	- Move hardcoded values/objects to defs?
+- Better DLC Compatibility
+	- Customizable Ideologies
+	- Customizable Xenotypes
+- Prevent AI from building settlements on tiles that already have one in progress (in the future; right now, it gets placed immediately)
